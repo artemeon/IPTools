@@ -89,10 +89,9 @@ class Network implements \Iterator, \Countable, \Stringable
 	}
 
 	/**
-	 * @param IP ip
-	 * @return int
-	 */
-	public static function netmask2prefix(IP $ip)
+     * @param IP ip
+     */
+    public static function netmask2prefix(IP $ip): int
 	{
 		return strlen(rtrim($ip->toBin(), 0));
 	}

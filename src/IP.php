@@ -144,20 +144,14 @@ class IP implements Stringable
 		return $version;
 	}
 
-	/**
-	 * @return int
-	 */
-	public function getMaxPrefixLength()
+	public function getMaxPrefixLength(): int
 	{
 		return $this->getVersion() === self::IP_V4
 			? self::IP_V4_MAX_PREFIX_LENGTH
 			: self::IP_V6_MAX_PREFIX_LENGTH;
 	}
 
-	/**
-	 * @return int
-	 */
-	public function getOctetsCount()
+	public function getOctetsCount(): int
 	{
 		return $this->getVersion() === self::IP_V4
 			? self::IP_V4_OCTETS
