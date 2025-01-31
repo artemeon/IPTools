@@ -33,4 +33,4 @@ return RectorConfig::configure()
                                    __DIR__ . '/src',
                                    __DIR__ . '/tests',
                                ])
-                   ->withTypeCoverageLevel(0);
+                   ->withTypeCoverageLevel(1);

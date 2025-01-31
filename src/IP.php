@@ -50,7 +50,7 @@ class IP implements Stringable
 	 * @param string ip
 	 * @return IP
 	 */
-	public static function parse($ip)
+	public static function parse($ip): self
 	{
 		if (str_starts_with((string) $ip, '0x')) {
 			$ip = substr((string) $ip, 2);
