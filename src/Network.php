@@ -231,7 +231,7 @@ class Network implements \Iterator, \Countable, \Stringable
 	 * @return Network[]
 	 * @throws NetworkException
 	 */
-	public function exclude($exclude)
+	public function exclude($exclude): array
 	{
 		$exclude = self::parse($exclude);
 
@@ -285,7 +285,7 @@ class Network implements \Iterator, \Countable, \Stringable
 	 * @return Network[]
 	 * @throws NetworkException
 	 */
-	public function moveTo($prefixLength)
+	public function moveTo($prefixLength): array
 	{
 		$maxPrefixLength = $this->ip->getMaxPrefixLength();
 

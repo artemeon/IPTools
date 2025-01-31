@@ -129,7 +129,7 @@ class Range implements \Iterator, \Countable
 	/**
 	 * @return Network[]
 	 */
-	public function getNetworks()
+	public function getNetworks(): array
 	{
 		$span = $this->getSpanNetwork();
 
