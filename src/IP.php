@@ -2,12 +2,13 @@
 namespace IPTools;
 
 use IPTools\Exception\IpException;
+use Stringable;
 
 /**
  * @author Safarov Alisher <alisher.safarov@outlook.com>
  * @link https://github.com/S1lentium/IPTools
  */
-class IP
+class IP implements Stringable
 {
 	use PropertyTrait;
 
@@ -40,9 +41,9 @@ class IP
 	/**
 	 * @return string
 	 */
-	public function __toString()
+	public function __toString(): string
 	{
-		return inet_ntop($this->in_addr);
+		return (string) inet_ntop($this->in_addr);
 	}
 
 	/**
@@ -51,13 +52,13 @@ class IP
 	 */
 	public static function parse($ip)
 	{
-		if (strpos($ip, '0x') === 0) {
-			$ip = substr($ip, 2);
+		if (str_starts_with((string) $ip, '0x')) {
+			$ip = substr((string) $ip, 2);
 			return self::parseHex($ip);
 		}
 
-		if (strpos($ip, '0b') === 0) {
-			$ip = substr($ip, 2);
+		if (str_starts_with((string) $ip, '0b')) {
+			$ip = substr((string) $ip, 2);
 			return self::parseBin($ip);
 		}
 
@@ -73,7 +74,7 @@ class IP
 	 * @throws IpException
 	 * @return IP
 	 */
-	public static function parseBin($binIP)
+	public static function parseBin($binIP): self
 	{
 		if (!preg_match('/^([0-1]{32}|[0-1]{128})$/', $binIP)) {
 			throw new IpException("Invalid binary IP address format");
@@ -92,7 +93,7 @@ class IP
 	 * @throws IpException
 	 * @return IP
 	 */
-	public static function parseHex($hexIP)
+	public static function parseHex($hexIP): self
 	{
 		if (!preg_match('/^([0-9a-fA-F]{8}|[0-9a-fA-F]{32})$/', $hexIP)) {
 			throw new IpException("Invalid hexadecimal IP address format");
@@ -105,17 +106,17 @@ class IP
 	 * @param string|int $longIP
 	 * @return IP
 	 */
-	public static function parseLong($longIP, $version=self::IP_V4)
+	public static function parseLong($longIP, $version=self::IP_V4): self
 	{
 		if ($version === self::IP_V4) {
 			$ip = new self(long2ip($longIP));
 		} else {
-			$binary = array();
+			$binary = [];
 			for ($i = 0; $i < self::IP_V6_OCTETS; $i++) {
 				$binary[] = bcmod($longIP, 256);
 				$longIP = bcdiv($longIP, 256, 0);
 			}
-			$ip = new self(inet_ntop(call_user_func_array('pack', array_merge(array('C*'), array_reverse($binary)))));
+			$ip = new self(inet_ntop(call_user_func_array('pack', array_merge(['C*'], array_reverse($binary)))));
 		}
 
 		return $ip;
@@ -125,7 +126,7 @@ class IP
 	 * @param string $inAddr
 	 * @return IP
 	 */
-	public static function parseInAddr($inAddr)
+	public static function parseInAddr($inAddr): self
 	{
 		return new self(inet_ntop($inAddr));
 	}
@@ -176,7 +177,7 @@ class IP
 			$reversePointer = implode('.', $reverseOctets) . '.in-addr.arpa';
 		} else {
 			$unpacked = unpack('H*hex', $this->in_addr);
-			$reverseOctets = array_reverse(str_split($unpacked['hex']));
+			$reverseOctets = array_reverse(str_split((string) $unpacked['hex']));
 			$reversePointer = implode('.', $reverseOctets) . '.ip6.arpa';
 		}
 
@@ -196,12 +197,12 @@ class IP
 	 */
 	public function toBin()
 	{
-		$binary = array();
+		$binary = [];
 		foreach (unpack('C*', $this->in_addr) as $char) {
 			$binary[] = str_pad(decbin($char), 8, '0', STR_PAD_LEFT);
 		}
 
-		return implode($binary);
+		return implode('', $binary);
 	}
 
 	/**
@@ -223,7 +224,7 @@ class IP
 		} else {
 			$octet = self::IP_V6_OCTETS - 1;
 			foreach ($chars = unpack('C*', $this->in_addr) as $char) {
-				$long = bcadd($long, bcmul($char, bcpow(256, $octet--)));
+				$long = bcadd($long, bcmul((string) $char, bcpow(256, $octet--)));
 			}
 		}
 
@@ -235,7 +236,7 @@ class IP
 	 * @return IP
 	 * @throws IpException
 	 */
-	public function next($to=1)
+	public function next($to=1): self
 	{
 		if ($to < 0) {
 			throw new IpException("Number must be greater than 0");
@@ -254,7 +255,7 @@ class IP
 			}
 		}
 
-		return new self(inet_ntop(call_user_func_array('pack', array_merge(array('C*'), $unpacked))));
+		return new self(inet_ntop(call_user_func_array('pack', array_merge(['C*'], $unpacked))));
 	}
 
 	/**
@@ -262,7 +263,7 @@ class IP
 	 * @return IP
 	 * @throws IpException
 	 */
-	public function prev($to=1)
+	public function prev($to=1): self
 	{
 
 		if ($to < 0) {
@@ -282,7 +283,7 @@ class IP
 			}
 		}
 
-		return new self(inet_ntop(call_user_func_array('pack', array_merge(array('C*'), $unpacked))));
+		return new self(inet_ntop(call_user_func_array('pack', array_merge(['C*'], $unpacked))));
 	}
 
 }

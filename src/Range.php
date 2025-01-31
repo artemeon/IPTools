@@ -40,17 +40,17 @@ class Range implements \Iterator, \Countable
 	 * @param string $data
 	 * @return Range
 	 */
-	public static function parse($data)
+	public static function parse($data): self
 	{
 		if (strpos($data,'/') || strpos($data,' ')) {
 			$network = Network::parse($data);
 			$firstIP = $network->getFirstIP();
 			$lastIP  = $network->getLastIP();
-		} elseif (strpos($data, '*') !== false) {
+		} elseif (str_contains($data, '*')) {
 			$firstIP = IP::parse(str_replace('*', '0', $data));
 			$lastIP  = IP::parse(str_replace('*', '255', $data));
 		} elseif (strpos($data, '-')) {
-			list($first, $last) = explode('-', $data, 2);
+			[$first, $last] = explode('-', $data, 2);
 			$firstIP = IP::parse($first);
 			$lastIP  = IP::parse($last);
 		} else {
@@ -133,12 +133,12 @@ class Range implements \Iterator, \Countable
 	{
 		$span = $this->getSpanNetwork();
 
-		$networks = array();
+		$networks = [];
 
 		if ($span->getFirstIP()->inAddr() === $this->firstIP->inAddr()
 			&& $span->getLastIP()->inAddr() === $this->lastIP->inAddr()
 		) {
-			$networks = array($span);
+			$networks = [$span];
 		} else {
 			if ($span->getFirstIP()->inAddr() !== $this->firstIP->inAddr()) {
 				$excluded = $span->exclude($this->firstIP->prev());
@@ -150,7 +150,7 @@ class Range implements \Iterator, \Countable
 			}
 
 			if ($span->getLastIP()->inAddr() !== $this->lastIP->inAddr()) {
-				if (!$networks) {
+				if ($networks === []) {
 					$excluded = $span->exclude($this->lastIP->next());
 				} else {
 					$excluded = array_pop($networks);
@@ -173,7 +173,7 @@ class Range implements \Iterator, \Countable
 	/**
 	 * @return Network
 	 */
-	public function getSpanNetwork()
+	public function getSpanNetwork(): \IPTools\Network
 	{
 		$xorIP = IP::parseInAddr($this->getFirstIP()->inAddr() ^ $this->getLastIP()->inAddr());
 

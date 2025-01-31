@@ -8,7 +8,7 @@ use ReturnTypeWillChange;
  * @author Safarov Alisher <alisher.safarov@outlook.com>
  * @link https://github.com/S1lentium/IPTools
  */
-class Network implements \Iterator, \Countable
+class Network implements \Iterator, \Countable, \Stringable
 {
 	use PropertyTrait;
 
@@ -39,7 +39,7 @@ class Network implements \Iterator, \Countable
 	 *
 	 * @return string
 	 */
-	public function __toString()
+	public function __toString(): string
 	{
 		return $this->getCIDR();
 	}
@@ -48,13 +48,13 @@ class Network implements \Iterator, \Countable
 	 * @param string $data
 	 * @return Network
 	 */
-	public static function parse($data)
+	public static function parse($data): self
 	{
 		if (preg_match('~^(.+?)/(\d+)$~', $data, $matches)) {
 			$ip      = IP::parse($matches[1]);
 			$netmask = self::prefix2netmask((int)$matches[2], $ip->getVersion());
 		} elseif (strpos($data,' ')) {
-			list($ip, $netmask) = explode(' ', $data, 2);
+			[$ip, $netmask] = explode(' ', $data, 2);
 			$ip      = IP::parse($ip);
 			$netmask = IP::parse($netmask);
 		} else {
@@ -73,7 +73,7 @@ class Network implements \Iterator, \Countable
 	 */
 	public static function prefix2netmask($prefixLength, $version)
 	{
-		if (!in_array($version, array(IP::IP_V4, IP::IP_V6))) {
+		if (!in_array($version, [IP::IP_V4, IP::IP_V6])) {
 			throw new NetworkException("Wrong IP version");
 		}
 
@@ -158,7 +158,7 @@ class Network implements \Iterator, \Countable
 	/**
 	 * @return IP
 	 */
-	public function getNetwork()
+	public function getNetwork(): \IPTools\IP
 	{
 		return new IP(inet_ntop($this->getIP()->inAddr() & $this->getNetmask()->inAddr()));
 	}
@@ -182,7 +182,7 @@ class Network implements \Iterator, \Countable
 	/**
 	 * @return IP
 	 */
-	public function getWildcard()
+	public function getWildcard(): \IPTools\IP
 	{
 		return new IP(inet_ntop(~$this->getNetmask()->inAddr()));
 	}
@@ -190,7 +190,7 @@ class Network implements \Iterator, \Countable
 	/**
 	 * @return IP
 	 */
-	public function getBroadcast()
+	public function getBroadcast(): \IPTools\IP
 	{
 		return new IP(inet_ntop($this->getNetwork()->inAddr() | ~$this->getNetmask()->inAddr()));
 	}
@@ -223,13 +223,13 @@ class Network implements \Iterator, \Countable
 			return bcpow('2', (string)($maxPrefixLength - $prefixLength));
 		}
 
-		return pow(2, $maxPrefixLength - $prefixLength);
+		return 2 ** ($maxPrefixLength - $prefixLength);
 	}
 
 	/**
 	 * @return Range
 	 */
-	public function getHosts()
+	public function getHosts(): \IPTools\Range
 	{
 		$firstHost = $this->getNetwork();
 		$lastHost = $this->getBroadcast();
@@ -259,7 +259,7 @@ class Network implements \Iterator, \Countable
 			throw new NetworkException('Exclude subnet not within target network');
 		}
 
-		$networks = array();
+		$networks = [];
 
 		$newPrefixLength = $this->getPrefixLength() + 1;
 		if ($newPrefixLength > $this->ip->getMaxPrefixLength()) {
@@ -310,7 +310,7 @@ class Network implements \Iterator, \Countable
 		}
 
 		$netmask = self::prefix2netmask($prefixLength, $this->ip->getVersion());
-		$networks = array();
+		$networks = [];
 
 		$subnet = clone $this;
 		$subnet->setPrefixLength($prefixLength);

@@ -38,9 +38,7 @@ class NetworkTest extends TestCase
         $this->assertEquals('192.0.0.255', (string)$network->lastIP);
     }
 
-    /**
-     * @dataProvider getTestParseData
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getTestParseData')]
     public function testParse($data, $expected)
     {
         $this->assertEquals($expected, (string)Network::parse($data));
@@ -53,9 +51,7 @@ class NetworkTest extends TestCase
         Network::parse('10.0.0.0/24 abc');
     }
 
-    /**
-     * @dataProvider getPrefixData
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getPrefixData')]
     public function testPrefix2Mask($prefix, $version, $mask)
     {
         $this->assertEquals($mask, Network::prefix2netmask($prefix, $version));
@@ -68,9 +64,7 @@ class NetworkTest extends TestCase
         Network::prefix2netmask('128', 'ip_version');
     }
 
-    /**
-     * @dataProvider getInvalidPrefixData
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getInvalidPrefixData')]
     public function testPrefix2MaskInvalidPrefix($prefix, $version)
     {
         $this->expectException(NetworkException::class);
@@ -78,9 +72,7 @@ class NetworkTest extends TestCase
         Network::prefix2netmask($prefix, $version);
     }
 
-    /**
-     * @dataProvider getHostsData
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getHostsData')]
     public function testHosts($data, $expected)
     {
         foreach(Network::parse($data)->getHosts as $ip) {
@@ -90,12 +82,10 @@ class NetworkTest extends TestCase
         $this->assertEquals($expected, $result);
     }
 
-    /**
-     * @dataProvider getExcludeData
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getExcludeData')]
     public function testExclude($data, $exclude, $expected)
     {
-        $result = array();
+        $result = [];
 
         foreach(Network::parse($data)->exclude($exclude) as $network) {
             $result[] = (string)$network;
@@ -104,9 +94,7 @@ class NetworkTest extends TestCase
         $this->assertEquals($expected, $result);
     }
 
-    /**
-     * @dataProvider getExcludeExceptionData
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getExcludeExceptionData')]
     public function testExcludeException($data, $exclude)
     {
         $this->expectException(NetworkException::class);
@@ -114,12 +102,10 @@ class NetworkTest extends TestCase
         Network::parse($data)->exclude($exclude);
     }
 
-    /**
-     * @dataProvider getMoveToData
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getMoveToData')]
     public function testMoveTo($network, $prefixLength, $expected)
     {
-        $result = array();
+        $result = [];
 
         foreach (Network::parse($network)->moveTo($prefixLength) as $network) {
             $result[] = (string)$network;
@@ -128,9 +114,7 @@ class NetworkTest extends TestCase
         $this->assertEquals($expected, $result);
     }
 
-    /**
-     * @dataProvider getMoveToExceptionData
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('getMoveToExceptionData')]
     public function testMoveToException($network, $prefixLength)
     {
         $this->expectException(NetworkException::class);
@@ -138,21 +122,17 @@ class NetworkTest extends TestCase
         Network::parse($network)->moveTo($prefixLength);
     }
 
-     /**
-     * @dataProvider getTestIterationData
-     */
+     #[\PHPUnit\Framework\Attributes\DataProvider('getTestIterationData')]
     public function testNetworkIteration($data, $expected)
     {
-        foreach (Network::parse($data) as $key => $ip) {
+        foreach (Network::parse($data) as $ip) {
            $result[] = (string)$ip;
         }
 
         $this->assertEquals($expected, $result);
     }
 
-     /**
-     * @dataProvider getTestCountData
-     */
+     #[\PHPUnit\Framework\Attributes\DataProvider('getTestCountData')]
     public function testCount($data, $expected)
     {
         $this->assertEquals($expected, count(Network::parse($data)));
@@ -160,117 +140,117 @@ class NetworkTest extends TestCase
 
     public function getTestParseData()
     {
-        return array(
-            array('192.168.0.54/24', '192.168.0.0/24'),
-            array('2001::2001:2001/32', '2001::/32'),
-            array('127.168.0.1 255.255.255.255', '127.168.0.1/32'),
-            array('1234::1234', '1234::1234/128'),
-        );
+        return [
+            ['192.168.0.54/24', '192.168.0.0/24'],
+            ['2001::2001:2001/32', '2001::/32'],
+            ['127.168.0.1 255.255.255.255', '127.168.0.1/32'],
+            ['1234::1234', '1234::1234/128'],
+        ];
     }
 
     public function getPrefixData()
     {
-        return array(
-            array('24', IP::IP_V4, IP::parse('255.255.255.0')),
-            array('32', IP::IP_V4, IP::parse('255.255.255.255')),
-            array('64', IP::IP_V6, IP::parse('ffff:ffff:ffff:ffff::')),
-            array('128', IP::IP_V6, IP::parse('ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff'))
-        );
+        return [
+            ['24', IP::IP_V4, IP::parse('255.255.255.0')],
+            ['32', IP::IP_V4, IP::parse('255.255.255.255')],
+            ['64', IP::IP_V6, IP::parse('ffff:ffff:ffff:ffff::')],
+            ['128', IP::IP_V6, IP::parse('ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff')]
+        ];
     }
 
     public function getInvalidPrefixData()
     {
-        return array(
-            array('-1', IP::IP_V4),
-            array('33', IP::IP_V4),
-            array('prefix', IP::IP_V4),
-            array('-1', IP::IP_V6),
-            array('129', IP::IP_V6),
-        );
+        return [
+            ['-1', IP::IP_V4],
+            ['33', IP::IP_V4],
+            ['prefix', IP::IP_V4],
+            ['-1', IP::IP_V6],
+            ['129', IP::IP_V6],
+        ];
     }
 
     public function getHostsData()
     {
-        return array(
-            array('192.0.2.0/29',
-                array(
+        return [
+            ['192.0.2.0/29',
+                [
                     '192.0.2.1',
                     '192.0.2.2',
                     '192.0.2.3',
                     '192.0.2.4',
                     '192.0.2.5',
                     '192.0.2.6',
-                )
-            ),
-        );
+                ]
+            ],
+        ];
     }
 
     public function getExcludeData()
     {
-        return array(
-            array('192.0.2.0/28', '192.0.2.1/32',
-                array(
+        return [
+            ['192.0.2.0/28', '192.0.2.1/32',
+                [
                     '192.0.2.0/32',
                     '192.0.2.2/31',
                     '192.0.2.4/30',
                     '192.0.2.8/29',
-                )
-            ),
-            array('192.0.2.2/32', '192.0.2.2/32', array()),
-        );
+                ]
+            ],
+            ['192.0.2.2/32', '192.0.2.2/32', []],
+        ];
     }
 
     public function getExcludeExceptionData()
     {
-        return array(
-            array('192.0.2.0/28', '192.0.3.0/24'),
-            array('192.0.2.2/32', '192.0.2.3/32'),
-        );
+        return [
+            ['192.0.2.0/28', '192.0.3.0/24'],
+            ['192.0.2.2/32', '192.0.2.3/32'],
+        ];
     }
 
     public function getMoveToData()
     {
-        return array(
-            array('192.168.0.0/22', '24',
-                array(
+        return [
+            ['192.168.0.0/22', '24',
+                [
                     '192.168.0.0/24',
                     '192.168.1.0/24',
                     '192.168.2.0/24',
                     '192.168.3.0/24'
-                )
-            ),
-            array('192.168.2.0/24', '25',
-                array(
+                ]
+            ],
+            ['192.168.2.0/24', '25',
+                [
                     '192.168.2.0/25',
                     '192.168.2.128/25'
-                )
-            ),
-            array('192.168.2.0/30', '32',
-                array(
+                ]
+            ],
+            ['192.168.2.0/30', '32',
+                [
                     '192.168.2.0/32',
                     '192.168.2.1/32',
                     '192.168.2.2/32',
                     '192.168.2.3/32'
-                )
-            ),
-        );
+                ]
+            ],
+        ];
     }
 
     public function getMoveToExceptionData()
     {
-        return array(
-            array('192.168.0.0/22', '22'),
-            array('192.168.0.0/22', '21'),
-            array('192.168.0.0/22', '33'),
-            array('192.168.0.0/22', 'prefixLength')
-        );
+        return [
+            ['192.168.0.0/22', '22'],
+            ['192.168.0.0/22', '21'],
+            ['192.168.0.0/22', '33'],
+            ['192.168.0.0/22', 'prefixLength']
+        ];
     }
 
     public function getTestIterationData()
     {
-        return array(
-            array('192.168.2.0/29',
-                array(
+        return [
+            ['192.168.2.0/29',
+                [
                     '192.168.2.0',
                     '192.168.2.1',
                     '192.168.2.2',
@@ -279,10 +259,10 @@ class NetworkTest extends TestCase
                     '192.168.2.5',
                     '192.168.2.6',
                     '192.168.2.7',
-                )
-            ),
-            array('2001:db8::/125',
-                array(
+                ]
+            ],
+            ['2001:db8::/125',
+                [
                     '2001:db8::',
                     '2001:db8::1',
                     '2001:db8::2',
@@ -291,16 +271,16 @@ class NetworkTest extends TestCase
                     '2001:db8::5',
                     '2001:db8::6',
                     '2001:db8::7',
-                )
-            ),
-        );
+                ]
+            ],
+        ];
     }
 
     public function getTestCountData()
     {
-        return array(
-            array('127.0.0.0/31', 2),
-            array('2001:db8::/120', 256),
-        );
+        return [
+            ['127.0.0.0/31', 2],
+            ['2001:db8::/120', 256],
+        ];
     }
 }

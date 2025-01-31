@@ -17,7 +17,7 @@ trait PropertyTrait
 			return $this->$name();
 		}
 
-		foreach (array('get', 'to') as $prefix) {
+		foreach (['get', 'to'] as $prefix) {
             $method = $prefix . ucfirst($name);
             if(method_exists($this, $method)) {
                 return $this->$method();
