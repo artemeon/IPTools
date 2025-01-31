@@ -13,12 +13,15 @@ class IP implements Stringable
 	use PropertyTrait;
 
 	const IP_V4 = 'IPv4';
+
 	const IP_V6 = 'IPv6';
 
 	const IP_V4_MAX_PREFIX_LENGTH = 32;
+
 	const IP_V6_MAX_PREFIX_LENGTH = 128;
 
 	const IP_V4_OCTETS = 4;
+
 	const IP_V6_OCTETS = 16;
 
 	/**
@@ -35,6 +38,7 @@ class IP implements Stringable
 		if (!filter_var($ip, FILTER_VALIDATE_IP)) {
 			throw new IpException("Invalid IP address format");
 		}
+
 		$this->in_addr = inet_pton($ip);
 	}
 
@@ -116,6 +120,7 @@ class IP implements Stringable
 				$binary[] = bcmod($longIP, 256);
 				$longIP = bcdiv($longIP, 256, 0);
 			}
+
 			$ip = new self(inet_ntop(call_user_func_array('pack', array_merge(['C*'], array_reverse($binary)))));
 		}
 

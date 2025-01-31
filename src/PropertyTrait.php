@@ -39,6 +39,7 @@ trait PropertyTrait
 			trigger_error('Undefined property');
 			return;
 		}
+
 		$this->$method($value);
 	}
 

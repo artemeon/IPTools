@@ -16,10 +16,12 @@ class Network implements \Iterator, \Countable, \Stringable
 	 * @var IP
 	 */
 	private $ip;
+
 	/**
      * @var IP
      */
 	private $netmask;
+
 	/**
 	 * @var int
 	 */

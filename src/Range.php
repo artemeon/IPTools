@@ -16,10 +16,12 @@ class Range implements \Iterator, \Countable
 	 * @var IP
 	 */
 	private $firstIP;
+
 	/**
 	 * @var IP
 	 */
 	private $lastIP;
+
 	/**
 	 * @var int
 	 */
