@@ -1,4 +1,4 @@
-## 1.0.0 - 2025-01-31
+## 3.0.0 - 2025-01-31
 - Drop support for PHP 8.1, PHP 8.2 and PHP 8.3.
 - Add Support for PHP 8.4.
 
