@@ -6,10 +6,14 @@ namespace IPTools\Tests;
 
 use IPTools\Exception\IpException;
 use IPTools\IP;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class IPTest extends TestCase
 {
+    /**
+     * @throws IpException
+     */
     public function testConstructor(): void
     {
         $ipv4String = '127.0.0.1';
@@ -29,7 +33,7 @@ final class IPTest extends TestCase
         $this->assertEquals(IP::IP_V6_OCTETS, $ipv6->getOctetsCount());
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('getTestContructorExceptionData')]
+    #[DataProvider('getTestConstructorExceptionData')]
     public function testConstructorException($string): void
     {
         $this->expectException(IpException::class);
@@ -50,7 +54,10 @@ final class IPTest extends TestCase
         $this->assertNotEmpty($ip->hex);
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('getToStringData')]
+    /**
+     * @throws IpException
+     */
+    #[DataProvider('getToStringData')]
     public function testToString($actual, $expected): void
     {
         $ip = new IP($actual);
@@ -58,14 +65,20 @@ final class IPTest extends TestCase
 
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('getTestParseData')]
+    /**
+     * @throws IpException
+     */
+    #[DataProvider('getTestParseData')]
     public function testParse($ipString, $expected): void
     {
         $ip = IP::parse($ipString);
         $this->assertEquals($expected, (string) $ip);
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('getParseBinData')]
+    /**
+     * @throws IpException
+     */
+    #[DataProvider('getParseBinData')]
     public function testParseBin($bin, $expectedString): void
     {
         $ip = IP::parseBin($bin);
@@ -81,6 +94,9 @@ final class IPTest extends TestCase
         IP::parseBin('192.168.1.1');
     }
 
+    /**
+     * @throws IpException
+     */
     public function testParseLong(): void
     {
         $ipv4long = '2130706433';
@@ -96,6 +112,9 @@ final class IPTest extends TestCase
         $this->assertEquals($ipv6Long, $ipv6->toLong());
     }
 
+    /**
+     * @throws IpException
+     */
     public function testParseHex(): void
     {
         $hex = '7f000001';
@@ -113,6 +132,9 @@ final class IPTest extends TestCase
         IP::parseHex('192.168.1.1');
     }
 
+    /**
+     * @throws IpException
+     */
     public function testParseInAddr(): void
     {
         $inAddr = inet_pton('127.0.0.1');
@@ -126,7 +148,10 @@ final class IPTest extends TestCase
         $this->assertEquals($inAddr, $ip->inAddr());
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('getTestNextData')]
+    /**
+     * @throws IpException
+     */
+    #[DataProvider('getTestNextData')]
     public function testNext($ip, $step, $expected): void
     {
         $object = new IP($ip);
@@ -135,7 +160,10 @@ final class IPTest extends TestCase
         $this->assertEquals($expected, (string) $next);
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('getTestPrevData')]
+    /**
+     * @throws IpException
+     */
+    #[DataProvider('getTestPrevData')]
     public function testPrev($ip, $step, $expected): void
     {
         $object = new IP($ip);
@@ -152,7 +180,10 @@ final class IPTest extends TestCase
         $ip->prev(-1);
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('getReversePointerData')]
+    /**
+     * @throws IpException
+     */
+    #[DataProvider('getReversePointerData')]
     public function testReversePointer($ip, $expected): void
     {
         $object = new IP($ip);
@@ -160,7 +191,7 @@ final class IPTest extends TestCase
         $this->assertEquals($expected, $reversePointer);
     }
 
-    public function getTestContructorExceptionData()
+    public static function getTestConstructorExceptionData(): array
     {
         return [
             ['256.0.0.1'],
@@ -174,7 +205,7 @@ final class IPTest extends TestCase
         ];
     }
 
-    public function getToStringData()
+    public static function getToStringData(): array
     {
         return [
             ['127.0.0.1', '127.0.0.1'],
@@ -184,7 +215,7 @@ final class IPTest extends TestCase
         ];
     }
 
-    public function getTestParseData()
+    public static function getTestParseData(): array
     {
         return [
             [2130706433, '127.0.0.1'], //long
@@ -196,7 +227,7 @@ final class IPTest extends TestCase
         ];
     }
 
-    public function getParseBinData()
+    public static function getParseBinData(): array
     {
         return [
             [
@@ -207,7 +238,7 @@ final class IPTest extends TestCase
         ];
     }
 
-    public function getTestNextData()
+    public static function getTestNextData(): array
     {
         return [
             ['192.168.0.1', 1, '192.168.0.2'],
@@ -219,7 +250,7 @@ final class IPTest extends TestCase
         ];
     }
 
-    public function getTestPrevData()
+    public static function getTestPrevData(): array
     {
         return [
             ['192.168.1.1', 1, '192.168.1.0'],
@@ -231,7 +262,7 @@ final class IPTest extends TestCase
         ];
     }
 
-    public function getReversePointerData()
+    public static function getReversePointerData(): array
     {
         return [
             ['192.0.2.5', '5.2.0.192.in-addr.arpa'],

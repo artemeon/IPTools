@@ -4,13 +4,22 @@ declare(strict_types=1);
 
 namespace IPTools\Tests;
 
+use IPTools\Exception\IpException;
+use IPTools\Exception\NetworkException;
+use IPTools\Exception\RangeException;
 use IPTools\IP;
 use IPTools\Range;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class RangeTest extends TestCase
 {
-    #[\PHPUnit\Framework\Attributes\DataProvider('getTestParseData')]
+    /**
+     * @throws NetworkException
+     * @throws RangeException
+     * @throws IpException
+     */
+    #[DataProvider('getTestParseData')]
     public function testParse($data, $expected): void
     {
         $range = Range::parse($data);
@@ -19,7 +28,12 @@ final class RangeTest extends TestCase
         $this->assertEquals($expected[1], $range->lastIP);
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('getTestNetworksData')]
+    /**
+     * @throws RangeException
+     * @throws NetworkException
+     * @throws IpException
+     */
+    #[DataProvider('getTestNetworksData')]
     public function testGetNetworks($data, $expected): void
     {
         $result = [];
@@ -31,15 +45,26 @@ final class RangeTest extends TestCase
         $this->assertEquals($expected, $result);        
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('getTestContainsData')]
+    /**
+     * @throws RangeException
+     * @throws NetworkException
+     * @throws IpException
+     */
+    #[DataProvider('getTestContainsData')]
     public function testContains($data, $find, $expected): void
     {
         $this->assertEquals($expected, Range::parse($data)->contains(new IP($find)));
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('getTestIterationData')]
+    /**
+     * @throws NetworkException
+     * @throws IpException
+     * @throws RangeException
+     */
+    #[DataProvider('getTestIterationData')]
     public function testRangeIteration($data, $expected): void
     {
+        $result = [];
         foreach (Range::parse($data) as $range) {
            $result[] = (string)$range;
         }
@@ -47,13 +72,18 @@ final class RangeTest extends TestCase
         $this->assertEquals($expected, $result);
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('getTestCountData')]
+    /**
+     * @throws NetworkException
+     * @throws RangeException
+     * @throws IpException
+     */
+    #[DataProvider('getTestCountData')]
     public function testCount($data, $expected): void
     {
-        $this->assertEquals($expected, count(Range::parse($data)));
+        $this->assertCount($expected, Range::parse($data));
     }
 
-    public function getTestParseData()
+    public static function getTestParseData(): array
     {
         return [
             ['127.0.0.1-127.255.255.255', ['127.0.0.1', '127.255.255.255']],
@@ -63,7 +93,7 @@ final class RangeTest extends TestCase
         ];
     }
 
-    public function getTestNetworksData()
+    public static function getTestNetworksData(): array
     {
         return [
             ['192.168.1.*', ['192.168.1.0/24']],
@@ -82,7 +112,7 @@ final class RangeTest extends TestCase
         ];
     }
 
-    public function getTestContainsData()
+    public static function getTestContainsData(): array
     {
         return [
             ['192.168.*.*', '192.168.245.15', true],
@@ -99,7 +129,7 @@ final class RangeTest extends TestCase
         ];
     }
 
-    public function getTestIterationData()
+    public static function getTestIterationData(): array
     {
         return [
             ['192.168.2.0-192.168.2.7', 
@@ -129,12 +159,11 @@ final class RangeTest extends TestCase
         ];
     }
 
-    public function getTestCountData()
+    public static function getTestCountData(): array
     {
         return [
             ['127.0.0.0/31', 2],
             ['2001:db8::/120', 256],
         ];
     }
-
 }
