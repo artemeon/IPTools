@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 class RangeTest extends TestCase
 {
     #[\PHPUnit\Framework\Attributes\DataProvider('getTestParseData')]
-    public function testParse($data, $expected)
+    public function testParse($data, $expected): void
     {
         $range = Range::parse($data);
 
@@ -18,7 +18,7 @@ class RangeTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('getTestNetworksData')]
-    public function testGetNetworks($data, $expected)
+    public function testGetNetworks($data, $expected): void
     {
         $result = [];
 
@@ -30,13 +30,13 @@ class RangeTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('getTestContainsData')]
-    public function testContains($data, $find, $expected)
+    public function testContains($data, $find, $expected): void
     {
         $this->assertEquals($expected, Range::parse($data)->contains(new IP($find)));
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('getTestIterationData')]
-    public function testRangeIteration($data, $expected)
+    public function testRangeIteration($data, $expected): void
     {
         foreach (Range::parse($data) as $ip) {
            $result[] = (string)$ip;
@@ -46,7 +46,7 @@ class RangeTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('getTestCountData')]
-    public function testCount($data, $expected)
+    public function testCount($data, $expected): void
     {
         $this->assertEquals($expected, count(Range::parse($data)));
     }

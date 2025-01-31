@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 class NetworkTest extends TestCase
 {
-    public function testConstructor()
+    public function testConstructor(): void
     {
         $ipv4 = new IP('127.0.0.1');
         $ipv4Netmask = new IP('255.255.255.0');
@@ -25,7 +25,7 @@ class NetworkTest extends TestCase
         $this->assertEquals('2001::/112', (string)$ipv6Network);
     }
 
-    public function testProperties()
+    public function testProperties(): void
     {
         $network = Network::parse('127.0.0.1/24');
 
@@ -39,12 +39,12 @@ class NetworkTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('getTestParseData')]
-    public function testParse($data, $expected)
+    public function testParse($data, $expected): void
     {
         $this->assertEquals($expected, (string)Network::parse($data));
     }
 
-    public function testParseWrongNetwork()
+    public function testParseWrongNetwork(): void
     {
         $this->expectException(IpException::class);
 
@@ -52,12 +52,12 @@ class NetworkTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('getPrefixData')]
-    public function testPrefix2Mask($prefix, $version, $mask)
+    public function testPrefix2Mask($prefix, $version, $mask): void
     {
         $this->assertEquals($mask, Network::prefix2netmask($prefix, $version));
     }
 
-    public function testPrefix2MaskWrongIPVersion()
+    public function testPrefix2MaskWrongIPVersion(): void
     {
         $this->expectException(NetworkException::class);
 
@@ -65,7 +65,7 @@ class NetworkTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('getInvalidPrefixData')]
-    public function testPrefix2MaskInvalidPrefix($prefix, $version)
+    public function testPrefix2MaskInvalidPrefix($prefix, $version): void
     {
         $this->expectException(NetworkException::class);
 
@@ -73,7 +73,7 @@ class NetworkTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('getHostsData')]
-    public function testHosts($data, $expected)
+    public function testHosts($data, $expected): void
     {
         foreach(Network::parse($data)->getHosts as $ip) {
             $result[] = (string)$ip;
@@ -83,7 +83,7 @@ class NetworkTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('getExcludeData')]
-    public function testExclude($data, $exclude, $expected)
+    public function testExclude($data, $exclude, $expected): void
     {
         $result = [];
 
@@ -95,7 +95,7 @@ class NetworkTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('getExcludeExceptionData')]
-    public function testExcludeException($data, $exclude)
+    public function testExcludeException($data, $exclude): void
     {
         $this->expectException(NetworkException::class);
 
@@ -103,7 +103,7 @@ class NetworkTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('getMoveToData')]
-    public function testMoveTo($network, $prefixLength, $expected)
+    public function testMoveTo($network, $prefixLength, $expected): void
     {
         $result = [];
 
@@ -115,7 +115,7 @@ class NetworkTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('getMoveToExceptionData')]
-    public function testMoveToException($network, $prefixLength)
+    public function testMoveToException($network, $prefixLength): void
     {
         $this->expectException(NetworkException::class);
 
@@ -123,7 +123,7 @@ class NetworkTest extends TestCase
     }
 
      #[\PHPUnit\Framework\Attributes\DataProvider('getTestIterationData')]
-    public function testNetworkIteration($data, $expected)
+    public function testNetworkIteration($data, $expected): void
     {
         foreach (Network::parse($data) as $ip) {
            $result[] = (string)$ip;
@@ -133,7 +133,7 @@ class NetworkTest extends TestCase
     }
 
      #[\PHPUnit\Framework\Attributes\DataProvider('getTestCountData')]
-    public function testCount($data, $expected)
+    public function testCount($data, $expected): void
     {
         $this->assertEquals($expected, count(Network::parse($data)));
     }
