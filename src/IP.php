@@ -15,28 +15,24 @@ class IP implements Stringable
 {
 	use PropertyTrait;
 
-	const IP_V4 = 'IPv4';
+	const string IP_V4 = 'IPv4';
 
-	const IP_V6 = 'IPv6';
+	const string IP_V6 = 'IPv6';
 
-	const IP_V4_MAX_PREFIX_LENGTH = 32;
+	const int IP_V4_MAX_PREFIX_LENGTH = 32;
 
-	const IP_V6_MAX_PREFIX_LENGTH = 128;
+	const int IP_V6_MAX_PREFIX_LENGTH = 128;
 
-	const IP_V4_OCTETS = 4;
+	const int IP_V4_OCTETS = 4;
 
-	const IP_V6_OCTETS = 16;
+	const int IP_V6_OCTETS = 16;
 
-	/**
-	 * @var string
-	 */
-	private $in_addr;
+	private string $in_addr;
 
 	/**
-	 * @param string ip
 	 * @throws IpException
 	 */
-	public function __construct($ip)
+	public function __construct(string $ip)
 	{
 		if (!filter_var($ip, FILTER_VALIDATE_IP)) {
 			throw new IpException("Invalid IP address format");
@@ -50,18 +46,18 @@ class IP implements Stringable
 		return (string) inet_ntop($this->in_addr);
 	}
 
-	/**
-     * @param string ip
+    /**
+     * @throws IpException
      */
-    public static function parse($ip): self
+    public static function parse(string $ip): self
 	{
-		if (str_starts_with((string) $ip, '0x')) {
-			$ip = substr((string) $ip, 2);
+		if (str_starts_with($ip, '0x')) {
+			$ip = substr($ip, 2);
 			return self::parseHex($ip);
 		}
 
-		if (str_starts_with((string) $ip, '0b')) {
-			$ip = substr((string) $ip, 2);
+		if (str_starts_with($ip, '0b')) {
+			$ip = substr($ip, 2);
 			return self::parseBin($ip);
 		}
 
@@ -72,11 +68,10 @@ class IP implements Stringable
 		return new self($ip);
 	}
 
-	/**
-     * @param string $binIP
+    /**
      * @throws IpException
      */
-    public static function parseBin($binIP): self
+    public static function parseBin(string $binIP): self
 	{
 		if (!preg_match('/^([0-1]{32}|[0-1]{128})$/', $binIP)) {
 			throw new IpException("Invalid binary IP address format");
@@ -91,10 +86,9 @@ class IP implements Stringable
 	}
 
 	/**
-     * @param string $hexIP
      * @throws IpException
      */
-    public static function parseHex($hexIP): self
+    public static function parseHex(string $hexIP): self
 	{
 		if (!preg_match('/^([0-9a-fA-F]{8}|[0-9a-fA-F]{32})$/', $hexIP)) {
 			throw new IpException("Invalid hexadecimal IP address format");
@@ -103,18 +97,18 @@ class IP implements Stringable
 		return new self(inet_ntop(pack('H*', $hexIP)));
 	}
 
-	/**
-     * @param string|int $longIP
+    /**
+     * @throws IpException
      */
-    public static function parseLong($longIP, $version=self::IP_V4): self
+    public static function parseLong(int|string $longIP, $version=self::IP_V4): self
 	{
 		if ($version === self::IP_V4) {
 			$ip = new self(long2ip($longIP));
 		} else {
 			$binary = [];
 			for ($i = 0; $i < self::IP_V6_OCTETS; ++$i) {
-				$binary[] = bcmod($longIP, 256);
-				$longIP = bcdiv($longIP, 256, 0);
+				$binary[] = bcmod($longIP, '256');
+				$longIP = bcdiv($longIP, '256');
 			}
 
 			$ip = new self(inet_ntop(pack(...array_merge(['C*'], array_reverse($binary)))));
@@ -123,10 +117,10 @@ class IP implements Stringable
 		return $ip;
 	}
 
-	/**
-     * @param string $inAddr
+    /**
+     * @throws IpException
      */
-    public static function parseInAddr($inAddr): self
+    public static function parseInAddr(string $inAddr): self
 	{
 		return new self(inet_ntop($inAddr));
 	}
@@ -172,11 +166,11 @@ class IP implements Stringable
 		return $reversePointer;
 	}
 
-	/**
-	 * @return string
-	 */
-	public function inAddr()
-	{
+    /**
+     * @return false|string
+     */
+	public function inAddr(): false|string
+    {
 		return $this->in_addr;
 	}
 
@@ -198,15 +192,16 @@ class IP implements Stringable
 	/**
 	 * @return string
 	 */
-	public function toLong()
+	public function toLong(): string
 	{
 		$long = 0;
 		if ($this->getVersion() === self::IP_V4) {
 			$long = sprintf('%u', ip2long(inet_ntop($this->in_addr)));
 		} else {
 			$octet = self::IP_V6_OCTETS - 1;
-			foreach ($chars = unpack('C*', $this->in_addr) as $char) {
-				$long = bcadd($long, bcmul((string) $char, bcpow(256, $octet--)));
+			foreach (unpack('C*', $this->in_addr) as $char) {
+                $exponent = (string) $octet--;
+				$long = bcadd($long, bcmul((string) $char, bcpow('256', $exponent)));
 			}
 		}
 
@@ -214,10 +209,9 @@ class IP implements Stringable
 	}
 
 	/**
-     * @param int $to
      * @throws IpException
      */
-    public function next($to=1): self
+    public function next(int $to = 1): self
 	{
 		if ($to < 0) {
 			throw new IpException("Number must be greater than 0");
@@ -240,12 +234,10 @@ class IP implements Stringable
 	}
 
 	/**
-     * @param int $to
      * @throws IpException
      */
-    public function prev($to=1): self
+    public function prev(int $to = 1): self
 	{
-
 		if ($to < 0) {
 			throw new IpException("Number must be greater than 0");
 		}
@@ -265,5 +257,4 @@ class IP implements Stringable
 
 		return new self(inet_ntop(pack(...array_merge(['C*'], $unpacked))));
 	}
-
 }

@@ -12,9 +12,10 @@ trait PropertyTrait
 {
 	/**
 	 * @param string $name
+	 *
 	 * @return mixed
 	 */
-	public function __get($name)
+	public function __get(string $name)
 	{
 		if(method_exists($this, $name)) {
 			return $this->$name();
@@ -33,9 +34,9 @@ trait PropertyTrait
 
 	/**
 	 * @param string $name
-	 * @param mixed $value
+	 * @param mixed  $value
 	 */
-	public function __set($name, $value)
+	public function __set(string $name, mixed $value)
 	{
 		$method = 'set'. ucfirst($name);
 		if (!method_exists($this, $method)) {
@@ -45,5 +46,4 @@ trait PropertyTrait
 
 		$this->$method($value);
 	}
-
 }

@@ -4,31 +4,24 @@ declare(strict_types=1);
 
 namespace IPTools;
 
+use Countable;
+use IPTools\Exception\IpException;
+use IPTools\Exception\NetworkException;
 use IPTools\Exception\RangeException;
+use Iterator;
 use ReturnTypeWillChange;
 
 /**
  * @author Safarov Alisher <alisher.safarov@outlook.com>
  * @link https://github.com/S1lentium/IPTools
  */
-class Range implements \Iterator, \Countable
+class Range implements Iterator, Countable
 {
 	use PropertyTrait;
 
-	/**
-	 * @var IP
-	 */
-	private $firstIP;
-
-	/**
-	 * @var IP
-	 */
-	private $lastIP;
-
-	/**
-	 * @var int
-	 */
-	private $position = 0;
+	private IP $firstIP;
+	private IP $lastIP;
+	private int $position = 0;
 
 	/**
      * @throws RangeException
@@ -39,10 +32,12 @@ class Range implements \Iterator, \Countable
 		$this->setLastIP($lastIP);
 	}
 
-	/**
-     * @param string $data
+    /**
+     * @throws IpException
+     * @throws RangeException
+     * @throws NetworkException
      */
-    public static function parse($data): self
+    public static function parse(string $data): self
 	{
 		if (strpos($data,'/') || strpos($data,' ')) {
 			$network = Network::parse($data);
@@ -63,13 +58,12 @@ class Range implements \Iterator, \Countable
 		return new self($firstIP, $lastIP);
 	}
 
-	/**
-	 * @param IP|Network|Range $find
-	 * @return bool
-	 * @throws RangeException
-	 */
-	public function contains($find)
-	{
+    /**
+     * @throws RangeException
+     * @throws IpException
+     */
+	public function contains(Network|IP|Range $find): bool
+    {
 		if ($find instanceof IP) {
 			$within = (strcmp($find->inAddr(), $this->firstIP->inAddr()) >= 0)
 				&& (strcmp($find->inAddr(), $this->lastIP->inAddr()) <= 0);
@@ -89,9 +83,9 @@ class Range implements \Iterator, \Countable
 	/**
      * @throws RangeException
      */
-    public function setFirstIP(IP $ip)
-	{
-		if ($this->lastIP && strcmp($ip->inAddr(), $this->lastIP->inAddr()) > 0) {
+    public function setFirstIP(IP $ip): void
+    {
+		if (strcmp($ip->inAddr(), $this->lastIP->inAddr()) > 0) {
 			throw new RangeException('First IP is grater than second');
 		}
 
@@ -101,34 +95,31 @@ class Range implements \Iterator, \Countable
 	/**
      * @throws RangeException
      */
-    public function setLastIP(IP $ip)
-	{
-		if ($this->firstIP && strcmp($ip->inAddr(), $this->firstIP->inAddr()) < 0) {
+    public function setLastIP(IP $ip): void
+    {
+		if (strcmp($ip->inAddr(), $this->firstIP->inAddr()) < 0) {
 			throw new RangeException('Last IP is less than first');
 		}
 
 		$this->lastIP = $ip;
 	}
 
-	/**
-	 * @return IP
-	 */
-	public function getFirstIP()
-	{
+	public function getFirstIP(): IP
+    {
 		return $this->firstIP;
 	}
 
-	/**
-	 * @return IP
-	 */
-	public function getLastIP()
-	{
+	public function getLastIP(): IP
+    {
 		return $this->lastIP;
 	}
 
-	/**
-	 * @return Network[]
-	 */
+    /**
+     * @return Network[]
+     * @throws IpException
+     * @throws NetworkException
+     * @throws RangeException
+     */
 	public function getNetworks(): array
 	{
 		$span = $this->getSpanNetwork();
@@ -170,7 +161,11 @@ class Range implements \Iterator, \Countable
 		return $networks;
 	}
 
-	public function getSpanNetwork(): \IPTools\Network
+    /**
+     * @throws NetworkException
+     * @throws IpException
+     */
+    public function getSpanNetwork(): Network
 	{
 		$xorIP = IP::parseInAddr($this->getFirstIP()->inAddr() ^ $this->getLastIP()->inAddr());
 
@@ -183,58 +178,46 @@ class Range implements \Iterator, \Countable
 		return new Network($ip, Network::prefix2netmask($prefixLength, $ip->getVersion()));
 	}
 
-	/**
-	 * @return IP
-	 */
-	#[ReturnTypeWillChange]
-	public function current()
+    /**
+     * @throws IpException
+     */
+    #[ReturnTypeWillChange]
+	public function current(): IP
 	{
 		return $this->firstIP->next($this->position);
 	}
 
-	/**
-	 * @return int
-	 */
 	#[ReturnTypeWillChange]
-	public function key()
-	{
+	public function key(): int
+    {
 		return $this->position;
 	}
 
-    /**
-     * @return void
-     */
-	#[ReturnTypeWillChange]
-	public function next()
-	{
+  	#[ReturnTypeWillChange]
+	public function next(): void
+    {
 		++$this->position;
 	}
 
-    /**
-     * @return void
-     */
 	#[ReturnTypeWillChange]
-	public function rewind()
-	{
+	public function rewind(): void
+    {
 		$this->position = 0;
 	}
 
-	/**
-	 * @return bool
-	 */
+    /**
+     * @throws IpException
+     */
 	#[ReturnTypeWillChange]
-	public function valid()
-	{
+	public function valid(): bool
+    {
 		return strcmp($this->firstIP->next($this->position)->inAddr(), $this->lastIP->inAddr()) <= 0;
 	}
 
-	/**
-	 * @return int
-	 */
 	#[ReturnTypeWillChange]
-	public function count()
-	{
-		return (integer)bcadd(bcsub($this->lastIP->toLong(), $this->firstIP->toLong()), 1);
+	public function count(): int
+    {
+		return (int)bcadd(bcsub($this->lastIP->toLong(), $this->firstIP->toLong()), '1');
 	}
 
 }
