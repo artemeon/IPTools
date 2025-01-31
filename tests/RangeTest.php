@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace IPTools\Tests;
 
 use IPTools\IP;
 use IPTools\Range;
 use PHPUnit\Framework\TestCase;
 
-class RangeTest extends TestCase
+final class RangeTest extends TestCase
 {
     #[\PHPUnit\Framework\Attributes\DataProvider('getTestParseData')]
     public function testParse($data, $expected): void
@@ -38,8 +40,8 @@ class RangeTest extends TestCase
     #[\PHPUnit\Framework\Attributes\DataProvider('getTestIterationData')]
     public function testRangeIteration($data, $expected): void
     {
-        foreach (Range::parse($data) as $ip) {
-           $result[] = (string)$ip;
+        foreach (Range::parse($data) as $range) {
+           $result[] = (string)$range;
         }
 
         $this->assertEquals($expected, $result);

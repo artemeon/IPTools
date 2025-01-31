@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace IPTools;
 
 use IPTools\Exception\IpException;
@@ -42,19 +45,15 @@ class IP implements Stringable
 		$this->in_addr = inet_pton($ip);
 	}
 
-	/**
-	 * @return string
-	 */
 	public function __toString(): string
 	{
 		return (string) inet_ntop($this->in_addr);
 	}
 
 	/**
-	 * @param string ip
-	 * @return IP
-	 */
-	public static function parse($ip): self
+     * @param string ip
+     */
+    public static function parse($ip): self
 	{
 		if (str_starts_with((string) $ip, '0x')) {
 			$ip = substr((string) $ip, 2);
@@ -74,11 +73,10 @@ class IP implements Stringable
 	}
 
 	/**
-	 * @param string $binIP
-	 * @throws IpException
-	 * @return IP
-	 */
-	public static function parseBin($binIP): self
+     * @param string $binIP
+     * @throws IpException
+     */
+    public static function parseBin($binIP): self
 	{
 		if (!preg_match('/^([0-1]{32}|[0-1]{128})$/', $binIP)) {
 			throw new IpException("Invalid binary IP address format");
@@ -93,11 +91,10 @@ class IP implements Stringable
 	}
 
 	/**
-	 * @param string $hexIP
-	 * @throws IpException
-	 * @return IP
-	 */
-	public static function parseHex($hexIP): self
+     * @param string $hexIP
+     * @throws IpException
+     */
+    public static function parseHex($hexIP): self
 	{
 		if (!preg_match('/^([0-9a-fA-F]{8}|[0-9a-fA-F]{32})$/', $hexIP)) {
 			throw new IpException("Invalid hexadecimal IP address format");
@@ -107,31 +104,29 @@ class IP implements Stringable
 	}
 
 	/**
-	 * @param string|int $longIP
-	 * @return IP
-	 */
-	public static function parseLong($longIP, $version=self::IP_V4): self
+     * @param string|int $longIP
+     */
+    public static function parseLong($longIP, $version=self::IP_V4): self
 	{
 		if ($version === self::IP_V4) {
 			$ip = new self(long2ip($longIP));
 		} else {
 			$binary = [];
-			for ($i = 0; $i < self::IP_V6_OCTETS; $i++) {
+			for ($i = 0; $i < self::IP_V6_OCTETS; ++$i) {
 				$binary[] = bcmod($longIP, 256);
 				$longIP = bcdiv($longIP, 256, 0);
 			}
 
-			$ip = new self(inet_ntop(call_user_func_array('pack', array_merge(['C*'], array_reverse($binary)))));
+			$ip = new self(inet_ntop(pack(...array_merge(['C*'], array_reverse($binary)))));
 		}
 
 		return $ip;
 	}
 
 	/**
-	 * @param string $inAddr
-	 * @return IP
-	 */
-	public static function parseInAddr($inAddr): self
+     * @param string $inAddr
+     */
+    public static function parseInAddr($inAddr): self
 	{
 		return new self(inet_ntop($inAddr));
 	}
@@ -237,11 +232,10 @@ class IP implements Stringable
 	}
 
 	/**
-	 * @param int $to
-	 * @return IP
-	 * @throws IpException
-	 */
-	public function next($to=1): self
+     * @param int $to
+     * @throws IpException
+     */
+    public function next($to=1): self
 	{
 		if ($to < 0) {
 			throw new IpException("Number must be greater than 0");
@@ -249,10 +243,10 @@ class IP implements Stringable
 
 		$unpacked = unpack('C*', $this->in_addr);
 
-		for ($i = 0; $i < $to; $i++)	{
+		for ($i = 0; $i < $to; ++$i)	{
 			for ($byte = count($unpacked); $byte >= 0; --$byte) {
 				if ($unpacked[$byte] < 255) {
-					$unpacked[$byte]++;
+					++$unpacked[$byte];
 					break;
 				}
 
@@ -260,15 +254,14 @@ class IP implements Stringable
 			}
 		}
 
-		return new self(inet_ntop(call_user_func_array('pack', array_merge(['C*'], $unpacked))));
+		return new self(inet_ntop(pack(...array_merge(['C*'], $unpacked))));
 	}
 
 	/**
-	 * @param int $to
-	 * @return IP
-	 * @throws IpException
-	 */
-	public function prev($to=1): self
+     * @param int $to
+     * @throws IpException
+     */
+    public function prev($to=1): self
 	{
 
 		if ($to < 0) {
@@ -277,18 +270,18 @@ class IP implements Stringable
 
 		$unpacked = unpack('C*', $this->in_addr);
 
-		for ($i = 0; $i < $to; $i++)	{
+		for ($i = 0; $i < $to; ++$i)	{
 			for ($byte = count($unpacked); $byte >= 0; --$byte) {
 				if ($unpacked[$byte] === 0) {
 					$unpacked[$byte] = 255;
 				} else {
-					$unpacked[$byte]--;
+					--$unpacked[$byte];
 					break;
 				}
 			}
 		}
 
-		return new self(inet_ntop(call_user_func_array('pack', array_merge(['C*'], $unpacked))));
+		return new self(inet_ntop(pack(...array_merge(['C*'], $unpacked))));
 	}
 
 }

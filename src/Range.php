@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace IPTools;
 
 use IPTools\Exception\RangeException;
@@ -28,21 +31,18 @@ class Range implements \Iterator, \Countable
 	private $position = 0;
 
 	/**
-	 * @param IP $firstIP
-	 * @param IP $lastIP
-	 * @throws RangeException
-	 */
-	public function __construct(IP $firstIP, IP $lastIP)
+     * @throws RangeException
+     */
+    public function __construct(IP $firstIP, IP $lastIP)
 	{
 		$this->setFirstIP($firstIP);
 		$this->setLastIP($lastIP);
 	}
 
 	/**
-	 * @param string $data
-	 * @return Range
-	 */
-	public static function parse($data): self
+     * @param string $data
+     */
+    public static function parse($data): self
 	{
 		if (strpos($data,'/') || strpos($data,' ')) {
 			$network = Network::parse($data);
@@ -87,10 +87,9 @@ class Range implements \Iterator, \Countable
 	}
 
 	/**
-	 * @param IP $ip
-	 * @throws RangeException
-	 */
-	public function setFirstIP(IP $ip)
+     * @throws RangeException
+     */
+    public function setFirstIP(IP $ip)
 	{
 		if ($this->lastIP && strcmp($ip->inAddr(), $this->lastIP->inAddr()) > 0) {
 			throw new RangeException('First IP is grater than second');
@@ -100,10 +99,9 @@ class Range implements \Iterator, \Countable
 	}
 
 	/**
-	 * @param IP $ip
-	 * @throws RangeException
-	 */
-	public function setLastIP(IP $ip)
+     * @throws RangeException
+     */
+    public function setLastIP(IP $ip)
 	{
 		if ($this->firstIP && strcmp($ip->inAddr(), $this->firstIP->inAddr()) < 0) {
 			throw new RangeException('Last IP is less than first');
@@ -172,9 +170,6 @@ class Range implements \Iterator, \Countable
 		return $networks;
 	}
 
-	/**
-	 * @return Network
-	 */
 	public function getSpanNetwork(): \IPTools\Network
 	{
 		$xorIP = IP::parseInAddr($this->getFirstIP()->inAddr() ^ $this->getLastIP()->inAddr());

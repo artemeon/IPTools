@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace IPTools;
 
 use IPTools\Exception\NetworkException;
@@ -27,30 +30,21 @@ class Network implements \Iterator, \Countable, \Stringable
 	 */
 	private $position = 0;
 
-	/**
-	 * @param IP $ip
-	 * @param IP $netmask
-	 */
 	public function __construct(IP $ip, IP $netmask)
 	{
 		$this->setIP($ip);
 		$this->setNetmask($netmask);
 	}
 
-	/**
-	 *
-	 * @return string
-	 */
 	public function __toString(): string
 	{
 		return $this->getCIDR();
 	}
 
 	/**
-	 * @param string $data
-	 * @return Network
-	 */
-	public static function parse($data): self
+     * @param string $data
+     */
+    public static function parse($data): self
 	{
 		if (preg_match('~^(.+?)/(\d+)$~', $data, $matches)) {
 			$ip      = IP::parse($matches[1]);
@@ -109,7 +103,7 @@ class Network implements \Iterator, \Countable, \Stringable
 	 */
 	public function setIP(IP $ip)
 	{
-		if (isset($this->netmask) && $this->netmask->getVersion() !== $ip->getVersion()) {
+		if ($this->netmask !== null && $this->netmask->getVersion() !== $ip->getVersion()) {
 			throw new NetworkException('IP version is not same as Netmask version');
 		}
 
@@ -126,7 +120,7 @@ class Network implements \Iterator, \Countable, \Stringable
 			throw new NetworkException('Invalid Netmask address format');
 		}
 
-		if (isset($this->ip) && $ip->getVersion() !== $this->ip->getVersion()) {
+		if ($this->ip !== null && $ip->getVersion() !== $this->ip->getVersion()) {
 			throw new NetworkException('Netmask version is not same as IP version');
 		}
 
@@ -157,9 +151,6 @@ class Network implements \Iterator, \Countable, \Stringable
 		return $this->netmask;
 	}
 
-	/**
-	 * @return IP
-	 */
 	public function getNetwork(): \IPTools\IP
 	{
 		return new IP(inet_ntop($this->getIP()->inAddr() & $this->getNetmask()->inAddr()));
@@ -181,17 +172,11 @@ class Network implements \Iterator, \Countable, \Stringable
 		return sprintf('%s/%s', $this->getNetwork(), $this->getPrefixLength());
 	}
 
-	/**
-	 * @return IP
-	 */
 	public function getWildcard(): \IPTools\IP
 	{
 		return new IP(inet_ntop(~$this->getNetmask()->inAddr()));
 	}
 
-	/**
-	 * @return IP
-	 */
 	public function getBroadcast(): \IPTools\IP
 	{
 		return new IP(inet_ntop($this->getNetwork()->inAddr() | ~$this->getNetmask()->inAddr()));
@@ -228,20 +213,15 @@ class Network implements \Iterator, \Countable, \Stringable
 		return 2 ** ($maxPrefixLength - $prefixLength);
 	}
 
-	/**
-	 * @return Range
-	 */
 	public function getHosts(): \IPTools\Range
 	{
 		$firstHost = $this->getNetwork();
 		$lastHost = $this->getBroadcast();
 
-		if ($this->ip->getVersion() === IP::IP_V4) {
-			if ($this->getBlockSize() > 2) {
-				$firstHost = IP::parseBin(substr($firstHost->toBin(), 0, $firstHost->getMaxPrefixLength() - 1) . '1');
-				$lastHost  = IP::parseBin(substr($lastHost->toBin(), 0, $lastHost->getMaxPrefixLength() - 1) . '0');
-			}
-		}
+		if ($this->ip->getVersion() === IP::IP_V4 && $this->getBlockSize() > 2) {
+            $firstHost = IP::parseBin(substr($firstHost->toBin(), 0, $firstHost->getMaxPrefixLength() - 1) . '1');
+            $lastHost  = IP::parseBin(substr($lastHost->toBin(), 0, $lastHost->getMaxPrefixLength() - 1) . '0');
+        }
 
 		return new Range($firstHost, $lastHost);
 	}
@@ -286,7 +266,9 @@ class Network implements \Iterator, \Countable, \Stringable
 
 			$networks[] = clone $unmatched;
 
-			if (++$newPrefixLength > $this->getNetwork()->getMaxPrefixLength()) break;
+			if (++$newPrefixLength > $this->getNetwork()->getMaxPrefixLength()) {
+                break;
+            }
 
 			$matched->setPrefixLength($newPrefixLength);
 			$unmatched->setPrefixLength($newPrefixLength);
@@ -311,7 +293,7 @@ class Network implements \Iterator, \Countable, \Stringable
 			throw new NetworkException('Invalid prefix length ');
 		}
 
-		$netmask = self::prefix2netmask($prefixLength, $this->ip->getVersion());
+		$ip = self::prefix2netmask($prefixLength, $this->ip->getVersion());
 		$networks = [];
 
 		$subnet = clone $this;
@@ -319,7 +301,7 @@ class Network implements \Iterator, \Countable, \Stringable
 
 		while ($subnet->ip->inAddr() <= $this->getLastIP()->inAddr()) {
 			$networks[] = $subnet;
-			$subnet = new self($subnet->getLastIP()->next(), $netmask);
+			$subnet = new self($subnet->getLastIP()->next(), $ip);
 		}
 
 		return $networks;

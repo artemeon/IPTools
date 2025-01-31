@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace IPTools\Tests;
 
 use IPTools\Exception\IpException;
 use IPTools\IP;
 use PHPUnit\Framework\TestCase;
 
-class IPTest extends TestCase
+final class IPTest extends TestCase
 {
     public function testConstructor(): void
     {
@@ -146,8 +148,8 @@ class IPTest extends TestCase
     {
         $this->expectException(IpException::class);
 
-        $object = new IP('192.168.1.1');
-        $object->prev(-1);
+        $ip = new IP('192.168.1.1');
+        $ip->prev(-1);
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('getReversePointerData')]

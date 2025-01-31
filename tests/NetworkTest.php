@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace IPTools\Tests;
 
 use IPTools\Exception\IpException;
@@ -8,7 +10,7 @@ use IPTools\IP;
 use IPTools\Network;
 use PHPUnit\Framework\TestCase;
 
-class NetworkTest extends TestCase
+final class NetworkTest extends TestCase
 {
     public function testConstructor(): void
     {
@@ -125,8 +127,8 @@ class NetworkTest extends TestCase
      #[\PHPUnit\Framework\Attributes\DataProvider('getTestIterationData')]
     public function testNetworkIteration($data, $expected): void
     {
-        foreach (Network::parse($data) as $ip) {
-           $result[] = (string)$ip;
+        foreach (Network::parse($data) as $network) {
+           $result[] = (string)$network;
         }
 
         $this->assertEquals($expected, $result);
