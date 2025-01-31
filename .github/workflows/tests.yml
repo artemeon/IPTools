@@ -1,0 +1,37 @@
+name: UNIT-TESTS
+on:
+  pull_request:
+  push:
+    branches:
+      - 1.x
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          coverage: xdebug
+      - name: Composer install
+        run: composer install --no-interaction --no-ansi --no-progress
+      - name: Run Tests
+        run: composer test:coverage
+  type_coverage:
+    name: Type Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          coverage: xdebug
+      - name: Composer install
+        run: composer install --no-interaction --no-ansi --no-progress
+      - name: Check Type Coverage
+        run: composer test:type-coverage
