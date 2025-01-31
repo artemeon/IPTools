@@ -131,10 +131,7 @@ class IP implements Stringable
 		return new self(inet_ntop($inAddr));
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getVersion()
+	public function getVersion(): string
 	{
 		$version = '';
 
@@ -167,10 +164,7 @@ class IP implements Stringable
 			: self::IP_V6_OCTETS;
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getReversePointer()
+	public function getReversePointer(): string
 	{
 		if ($this->getVersion() === self::IP_V4) {
 			$reverseOctets = array_reverse(explode('.', $this->__toString()));
@@ -192,10 +186,7 @@ class IP implements Stringable
 		return $this->in_addr;
 	}
 
-	/**
-	 * @return string
-	 */
-	public function toBin()
+	public function toBin(): string
 	{
 		$binary = [];
 		foreach (unpack('C*', $this->in_addr) as $char) {
@@ -205,10 +196,7 @@ class IP implements Stringable
 		return implode('', $binary);
 	}
 
-	/**
-	 * @return string
-	 */
-	public function toHex()
+	public function toHex(): string
 	{
 		return bin2hex($this->in_addr);
 	}

@@ -164,10 +164,7 @@ class Network implements \Iterator, \Countable, \Stringable
 		return self::netmask2prefix($this->getNetmask());
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getCIDR()
+	public function getCIDR(): string
 	{
 		return sprintf('%s/%s', $this->getNetwork(), $this->getPrefixLength());
 	}
