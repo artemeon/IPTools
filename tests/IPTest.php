@@ -101,7 +101,7 @@ final class IPTest extends TestCase
      */
     public function testParseLong(): void
     {
-        $ipv4long = '2130706433';
+        $ipv4long = 2130706433;
         $ipv4 = IP::parseLong($ipv4long);
 
         $ipv6Long = '340277174624079928635746076935438991360';
@@ -197,8 +197,8 @@ final class IPTest extends TestCase
         return [
             ['256.0.0.1'],
             ['127.-1.0.1'],
-            [123.45],
-            [-123.45],
+            ['123.45'],
+            ['-123.45'],
             ['cake'],
             ['12345'],
             ['-12345'],
@@ -219,7 +219,7 @@ final class IPTest extends TestCase
     public static function getTestParseData(): array
     {
         return [
-            [2130706433, '127.0.0.1'], // long
+            ['2130706433', '127.0.0.1'], // long
             ['0b01111111000000000000000000000001', '127.0.0.1'], // bin
             ['0x7f000001', '127.0.0.1'], // hex,
             ['0x20010000000000008000000000000000', '2001::8000:0:0:0'], // hex

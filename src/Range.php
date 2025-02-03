@@ -141,7 +141,7 @@ class Range implements Countable, Iterator
                     $excluded = $span->exclude($this->lastIP->next()->__toString());
                 } else {
                     $excluded = array_pop($networks);
-                    $excluded = $excluded->exclude($this->lastIP->next());
+                    $excluded = $excluded->exclude($this->lastIP->next()->__toString());
                 }
 
                 foreach ($excluded as $network) {

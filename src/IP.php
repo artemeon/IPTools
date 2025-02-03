@@ -64,7 +64,7 @@ class IP implements Stringable
         }
 
         if (is_numeric($ip)) {
-            return self::parseLong($ip);
+            return self::parseLong((int) $ip);
         }
 
         return new self($ip);
@@ -197,7 +197,7 @@ class IP implements Stringable
             $octet = self::IP_V6_OCTETS - 1;
             foreach (unpack('C*', $this->in_addr) as $char) {
                 $exponent = (string) $octet--;
-                $long = bcadd($long, bcmul((string) $char, bcpow('256', $exponent)));
+                $long = bcadd((string) $long, bcmul((string) $char, bcpow('256', $exponent)));
             }
         }
 
