@@ -29,8 +29,11 @@ class Network implements Iterator, Countable, Stringable
      */
     public function __construct(IP $ip, IP $netmask)
 	{
-		$this->setIP($ip);
+        $this->netmask = $netmask;
+        $this->ip = $ip;
+
 		$this->setNetmask($netmask);
+		$this->setIP($ip);
 	}
 
     /**
@@ -100,27 +103,27 @@ class Network implements Iterator, Countable, Stringable
 	 */
 	public function setIP(IP $ip): void
     {
+		$this->ip = $ip;
+
 		if ($this->netmask->getVersion() !== $ip->getVersion()) {
 			throw new NetworkException('IP version is not same as Netmask version');
 		}
-
-		$this->ip = $ip;
 	}
 
 	/**
 	 * @throws NetworkException
 	 */
-	public function setNetmask(IP $ip): void
+	public function setNetmask(IP $netMask): void
     {
-		if (!preg_match('/^1*0*$/',$ip->toBin())) {
+		$this->netmask = $netMask;
+
+		if (!preg_match('/^1*0*$/', $netMask->toBin())) {
 			throw new NetworkException('Invalid Netmask address format');
 		}
 
-		if ($ip->getVersion() !== $this->ip->getVersion()) {
+		if ($netMask->getVersion() !== $this->ip->getVersion()) {
 			throw new NetworkException('Netmask version is not same as IP version');
 		}
-
-		$this->netmask = $ip;
 	}
 
     /**

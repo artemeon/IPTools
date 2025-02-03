@@ -28,6 +28,9 @@ class Range implements Iterator, Countable
      */
     public function __construct(IP $firstIP, IP $lastIP)
 	{
+        $this->firstIP = $firstIP;
+        $this->lastIP = $lastIP;
+
 		$this->setFirstIP($firstIP);
 		$this->setLastIP($lastIP);
 	}

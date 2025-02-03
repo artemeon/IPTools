@@ -212,21 +212,20 @@ final class NetworkTest extends TestCase
     public static function getPrefixData(): array
     {
         return [
-            ['24', IP::IP_V4, IP::parse('255.255.255.0')],
-            ['32', IP::IP_V4, IP::parse('255.255.255.255')],
-            ['64', IP::IP_V6, IP::parse('ffff:ffff:ffff:ffff::')],
-            ['128', IP::IP_V6, IP::parse('ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff')]
+            [24, IP::IP_V4, IP::parse('255.255.255.0')],
+            [32, IP::IP_V4, IP::parse('255.255.255.255')],
+            [64, IP::IP_V6, IP::parse('ffff:ffff:ffff:ffff::')],
+            [128, IP::IP_V6, IP::parse('ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff')]
         ];
     }
 
     public static function getInvalidPrefixData(): array
     {
         return [
-            ['-1', IP::IP_V4],
-            ['33', IP::IP_V4],
-            ['prefix', IP::IP_V4],
-            ['-1', IP::IP_V6],
-            ['129', IP::IP_V6],
+            [-1, IP::IP_V4],
+            [33, IP::IP_V4],
+            [-1, IP::IP_V6],
+            [129, IP::IP_V6],
         ];
     }
 
@@ -272,7 +271,7 @@ final class NetworkTest extends TestCase
     public static function getMoveToData(): array
     {
         return [
-            ['192.168.0.0/22', '24',
+            ['192.168.0.0/22', 24,
                 [
                     '192.168.0.0/24',
                     '192.168.1.0/24',
@@ -280,13 +279,13 @@ final class NetworkTest extends TestCase
                     '192.168.3.0/24'
                 ]
             ],
-            ['192.168.2.0/24', '25',
+            ['192.168.2.0/24', 25,
                 [
                     '192.168.2.0/25',
                     '192.168.2.128/25'
                 ]
             ],
-            ['192.168.2.0/30', '32',
+            ['192.168.2.0/30', 32,
                 [
                     '192.168.2.0/32',
                     '192.168.2.1/32',
@@ -300,10 +299,9 @@ final class NetworkTest extends TestCase
     public static function getMoveToExceptionData(): array
     {
         return [
-            ['192.168.0.0/22', '22'],
-            ['192.168.0.0/22', '21'],
-            ['192.168.0.0/22', '33'],
-            ['192.168.0.0/22', 'prefixLength']
+            ['192.168.0.0/22', 22],
+            ['192.168.0.0/22', 21],
+            ['192.168.0.0/22', 33],
         ];
     }
 
