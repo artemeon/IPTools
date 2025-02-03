@@ -68,13 +68,13 @@ class Range implements Countable, Iterator
     public function contains(IP | Network | Range $find): bool
     {
         return match (true) {
-            $find instanceof IP      => (strcmp($find->inAddr(), $this->firstIP->inAddr()) >= 0)
+            $find instanceof IP => (strcmp($find->inAddr(), $this->firstIP->inAddr()) >= 0)
                                    && (strcmp($find->inAddr(), $this->lastIP->inAddr()) <= 0),
             $find instanceof Network => (strcmp($find->getFirstIP()->inAddr(), $this->firstIP->inAddr()) >= 0)
                                                                 && (strcmp($find->getLastIP()->inAddr(), $this->lastIP->inAddr()) <= 0),
-            $find instanceof Range   => (strcmp($find->getFirstIP()->inAddr(), $this->firstIP->inAddr()) >= 0)
+            $find instanceof Range => (strcmp($find->getFirstIP()->inAddr(), $this->firstIP->inAddr()) >= 0)
                                         && (strcmp($find->getLastIP()->inAddr(), $this->lastIP->inAddr()) <= 0),
-            default                  => throw new RangeException('Invalid type'),
+            default => throw new RangeException('Invalid type'),
         };
     }
 
