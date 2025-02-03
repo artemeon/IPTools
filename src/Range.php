@@ -128,7 +128,7 @@ class Range implements Iterator, Countable
 			$networks = [$span];
 		} else {
 			if ($span->getFirstIP()->inAddr() !== $this->firstIP->inAddr()) {
-				$excluded = $span->exclude($this->firstIP->prev());
+				$excluded = $span->exclude($this->firstIP->prev()->__toString());
 				foreach ($excluded as $network) {
 					if (strcmp($network->getFirstIP()->inAddr(), $this->firstIP->inAddr()) >= 0) {
 						$networks[] = $network;
@@ -138,7 +138,7 @@ class Range implements Iterator, Countable
 
 			if ($span->getLastIP()->inAddr() !== $this->lastIP->inAddr()) {
 				if ($networks === []) {
-					$excluded = $span->exclude($this->lastIP->next());
+					$excluded = $span->exclude($this->lastIP->next()->__toString());
 				} else {
 					$excluded = array_pop($networks);
 					$excluded = $excluded->exclude($this->lastIP->next());

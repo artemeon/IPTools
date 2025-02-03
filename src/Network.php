@@ -232,10 +232,10 @@ class Network implements Iterator, Countable, Stringable
 
     /**
      * @throws IpException
-     * @throws RangeException
      * @throws NetworkException
+     * @throws RangeException
      */
-    public function exclude($exclude): array
+    public function exclude(string $exclude): array
 	{
 		$exclude = self::parse($exclude);
 

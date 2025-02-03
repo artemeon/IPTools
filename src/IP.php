@@ -100,7 +100,7 @@ class IP implements Stringable
     /**
      * @throws IpException
      */
-    public static function parseLong(int|string $longIP, $version=self::IP_V4): self
+    public static function parseLong(int|string $longIP, string $version = self::IP_V4): self
 	{
 		if ($version === self::IP_V4) {
 			$ip = new self(long2ip($longIP));
