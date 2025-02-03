@@ -79,8 +79,7 @@ class Network implements Countable, Iterator, Stringable
             ? IP::IP_V4_MAX_PREFIX_LENGTH
             : IP::IP_V6_MAX_PREFIX_LENGTH;
 
-        if (!is_numeric($prefixLength)
-            || !($prefixLength >= 0 && $prefixLength <= $maxPrefixLength)
+        if (!($prefixLength >= 0 && $prefixLength <= $maxPrefixLength)
         ) {
             throw new NetworkException('Invalid prefix length');
         }
