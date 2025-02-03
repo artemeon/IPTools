@@ -9,6 +9,9 @@ use IPTools\IP;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ */
 final class IPTest extends TestCase
 {
     /**
@@ -61,8 +64,7 @@ final class IPTest extends TestCase
     public function testToString($actual, $expected): void
     {
         $ip = new IP($actual);
-        $this->assertEquals($expected, (string)$ip);
-
+        $this->assertEquals($expected, (string) $ip);
     }
 
     /**
@@ -105,10 +107,10 @@ final class IPTest extends TestCase
         $ipv6Long = '340277174624079928635746076935438991360';
         $ipv6 = IP::parseLong($ipv6Long, IP::IP_V6);
 
-        $this->assertEquals('127.0.0.1', (string)$ipv4);
+        $this->assertEquals('127.0.0.1', (string) $ipv4);
         $this->assertEquals($ipv4long, $ipv4->toLong());
 
-        $this->assertEquals('ffff::', (string)$ipv6);
+        $this->assertEquals('ffff::', (string) $ipv6);
         $this->assertEquals($ipv6Long, $ipv6->toLong());
     }
 
@@ -120,9 +122,8 @@ final class IPTest extends TestCase
         $hex = '7f000001';
         $ip = IP::parseHex($hex);
 
-        $this->assertEquals('127.0.0.1', (string)$ip);
+        $this->assertEquals('127.0.0.1', (string) $ip);
         $this->assertEquals($hex, $ip->toHex());
-
     }
 
     public function testParseHexException(): void
@@ -211,19 +212,19 @@ final class IPTest extends TestCase
             ['127.0.0.1', '127.0.0.1'],
             ['2001::', '2001::'],
             ['2001:0000:0000:0000:0000:0000:0000:0000', '2001::'],
-            ['2001:0000:0000:0000:8000:0000:0000:0000', '2001::8000:0:0:0']
+            ['2001:0000:0000:0000:8000:0000:0000:0000', '2001::8000:0:0:0'],
         ];
     }
 
     public static function getTestParseData(): array
     {
         return [
-            [2130706433, '127.0.0.1'], //long
-            ['0b01111111000000000000000000000001', '127.0.0.1'], //bin
-            ['0x7f000001', '127.0.0.1'], //hex,
-            ['0x20010000000000008000000000000000', '2001::8000:0:0:0'], //hex
+            [2130706433, '127.0.0.1'], // long
+            ['0b01111111000000000000000000000001', '127.0.0.1'], // bin
+            ['0x7f000001', '127.0.0.1'], // hex,
+            ['0x20010000000000008000000000000000', '2001::8000:0:0:0'], // hex
             ['127.0.0.1', '127.0.0.1'],
-            ['2001::', '2001::']
+            ['2001::', '2001::'],
         ];
     }
 
@@ -232,9 +233,9 @@ final class IPTest extends TestCase
         return [
             [
                 '00100000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
-                '2001::'
+                '2001::',
             ],
-            ['01111111000000000000000000000001', '127.0.0.1']
+            ['01111111000000000000000000000001', '127.0.0.1'],
         ];
     }
 
@@ -246,7 +247,7 @@ final class IPTest extends TestCase
             ['192.168.0.1', 255, '192.168.1.0'],
             ['2001::', 1, '2001::1'],
             ['2001::', 65535, '2001::ffff'],
-            ['2001::', 65536, '2001::1:0']
+            ['2001::', 65536, '2001::1:0'],
         ];
     }
 

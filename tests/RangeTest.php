@@ -12,6 +12,9 @@ use IPTools\Range;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ */
 final class RangeTest extends TestCase
 {
     /**
@@ -39,10 +42,10 @@ final class RangeTest extends TestCase
         $result = [];
 
         foreach (Range::parse($data)->getNetworks() as $network) {
-            $result[] = (string)$network;
+            $result[] = (string) $network;
         }
 
-        $this->assertEquals($expected, $result);        
+        $this->assertEquals($expected, $result);
     }
 
     /**
@@ -66,7 +69,7 @@ final class RangeTest extends TestCase
     {
         $result = [];
         foreach (Range::parse($data) as $range) {
-           $result[] = (string)$range;
+            $result[] = (string) $range;
         }
 
         $this->assertEquals($expected, $result);
@@ -99,11 +102,11 @@ final class RangeTest extends TestCase
             ['192.168.1.*', ['192.168.1.0/24']],
             ['192.168.1.208-192.168.1.255', [
                 '192.168.1.208/28',
-                '192.168.1.224/27' 
+                '192.168.1.224/27',
             ]],
             ['192.168.1.0-192.168.1.191', [
                 '192.168.1.0/25',
-                '192.168.1.128/26' 
+                '192.168.1.128/26',
             ]],
             ['192.168.1.125-192.168.1.126', [
                 '192.168.1.125/32',
@@ -119,8 +122,8 @@ final class RangeTest extends TestCase
             ['192.168.*.*', '192.169.255.255', false],
 
             /**
-             * 10.10.45.48 --> 00001010 00001010 00101101 00110000 
-             * the last 0000 leads error
+             * 10.10.45.48 --> 00001010 00001010 00101101 00110000
+             * the last 0000 leads error.
              */
             ['10.10.45.48/28', '10.10.45.58', true],
 
@@ -132,7 +135,7 @@ final class RangeTest extends TestCase
     public static function getTestIterationData(): array
     {
         return [
-            ['192.168.2.0-192.168.2.7', 
+            ['192.168.2.0-192.168.2.7',
                 [
                     '192.168.2.0',
                     '192.168.2.1',
@@ -142,7 +145,7 @@ final class RangeTest extends TestCase
                     '192.168.2.5',
                     '192.168.2.6',
                     '192.168.2.7',
-                ]
+                ],
             ],
             ['2001:db8::/125',
                 [
@@ -154,7 +157,7 @@ final class RangeTest extends TestCase
                     '2001:db8::5',
                     '2001:db8::6',
                     '2001:db8::7',
-                ]
+                ],
             ],
         ];
     }

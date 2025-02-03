@@ -10,40 +10,33 @@ namespace IPTools;
  */
 trait PropertyTrait
 {
-	/**
-	 * @param string $name
-	 *
-	 * @return mixed
-	 */
-	public function __get(string $name)
-	{
-		if(method_exists($this, $name)) {
-			return $this->$name();
-		}
+    public function __get(string $name)
+    {
+        if (method_exists($this, $name)) {
+            return $this->$name();
+        }
 
-		foreach (['get', 'to'] as $prefix) {
+        foreach (['get', 'to'] as $prefix) {
             $method = $prefix . ucfirst($name);
-            if(method_exists($this, $method)) {
+            if (method_exists($this, $method)) {
                 return $this->$method();
             }
         }
 
-		trigger_error('Undefined property');
-		return null;
-	}
+        trigger_error('Undefined property');
 
-	/**
-	 * @param string $name
-	 * @param mixed  $value
-	 */
-	public function __set(string $name, mixed $value)
-	{
-		$method = 'set'. ucfirst($name);
-		if (!method_exists($this, $method)) {
-			trigger_error('Undefined property');
-			return;
-		}
+        return null;
+    }
 
-		$this->$method($value);
-	}
+    public function __set(string $name, mixed $value): void
+    {
+        $method = 'set' . ucfirst($name);
+        if (!method_exists($this, $method)) {
+            trigger_error('Undefined property');
+
+            return;
+        }
+
+        $this->$method($value);
+    }
 }

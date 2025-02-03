@@ -12,6 +12,9 @@ use IPTools\Network;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ */
 final class NetworkTest extends TestCase
 {
     /**
@@ -28,8 +31,8 @@ final class NetworkTest extends TestCase
         $ipv4Network = new Network($ipv4, $ipv4Netmask);
         $ipv6Network = new Network($ipv6, $ipv6Netmask);
 
-        $this->assertEquals('127.0.0.0/24', (string)$ipv4Network);
-        $this->assertEquals('2001::/112', (string)$ipv6Network);
+        $this->assertEquals('127.0.0.0/24', (string) $ipv4Network);
+        $this->assertEquals('2001::/112', (string) $ipv6Network);
     }
 
     /**
@@ -43,10 +46,10 @@ final class NetworkTest extends TestCase
         $network->ip = new IP('192.0.0.2');
 
         $this->assertEquals('192.0.0.2', $network->ip);
-        $this->assertEquals('192.0.0.0/24', (string)$network);
-        $this->assertEquals('0.0.0.255', (string)$network->wildcard);
-        $this->assertEquals('192.0.0.0', (string)$network->firstIP);
-        $this->assertEquals('192.0.0.255', (string)$network->lastIP);
+        $this->assertEquals('192.0.0.0/24', (string) $network);
+        $this->assertEquals('0.0.0.255', (string) $network->wildcard);
+        $this->assertEquals('192.0.0.0', (string) $network->firstIP);
+        $this->assertEquals('192.0.0.255', (string) $network->lastIP);
     }
 
     /**
@@ -56,7 +59,7 @@ final class NetworkTest extends TestCase
     #[DataProvider('getTestParseData')]
     public function testParse($data, $expected): void
     {
-        $this->assertEquals($expected, (string)Network::parse($data));
+        $this->assertEquals($expected, (string) Network::parse($data));
     }
 
     /**
@@ -108,8 +111,8 @@ final class NetworkTest extends TestCase
     public function testHosts($data, $expected): void
     {
         $result = [];
-        foreach(Network::parse($data)->getHosts as $ip) {
-            $result[] = (string)$ip;
+        foreach (Network::parse($data)->getHosts as $ip) {
+            $result[] = (string) $ip;
         }
 
         $this->assertEquals($expected, $result);
@@ -125,8 +128,8 @@ final class NetworkTest extends TestCase
     {
         $result = [];
 
-        foreach(Network::parse($data)->exclude($exclude) as $network) {
-            $result[] = (string)$network;
+        foreach (Network::parse($data)->exclude($exclude) as $network) {
+            $result[] = (string) $network;
         }
 
         $this->assertEquals($expected, $result);
@@ -154,7 +157,7 @@ final class NetworkTest extends TestCase
         $result = [];
 
         foreach (Network::parse($network)->moveTo($prefixLength) as $network) {
-            $result[] = (string)$network;
+            $result[] = (string) $network;
         }
 
         $this->assertEquals($expected, $result);
@@ -180,7 +183,7 @@ final class NetworkTest extends TestCase
     {
         $result = [];
         foreach (Network::parse($data) as $network) {
-           $result[] = (string)$network;
+            $result[] = (string) $network;
         }
 
         $this->assertEquals($expected, $result);
@@ -215,7 +218,7 @@ final class NetworkTest extends TestCase
             [24, IP::IP_V4, IP::parse('255.255.255.0')],
             [32, IP::IP_V4, IP::parse('255.255.255.255')],
             [64, IP::IP_V6, IP::parse('ffff:ffff:ffff:ffff::')],
-            [128, IP::IP_V6, IP::parse('ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff')]
+            [128, IP::IP_V6, IP::parse('ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff')],
         ];
     }
 
@@ -240,7 +243,7 @@ final class NetworkTest extends TestCase
                     '192.0.2.4',
                     '192.0.2.5',
                     '192.0.2.6',
-                ]
+                ],
             ],
         ];
     }
@@ -254,7 +257,7 @@ final class NetworkTest extends TestCase
                     '192.0.2.2/31',
                     '192.0.2.4/30',
                     '192.0.2.8/29',
-                ]
+                ],
             ],
             ['192.0.2.2/32', '192.0.2.2/32', []],
         ];
@@ -276,22 +279,22 @@ final class NetworkTest extends TestCase
                     '192.168.0.0/24',
                     '192.168.1.0/24',
                     '192.168.2.0/24',
-                    '192.168.3.0/24'
-                ]
+                    '192.168.3.0/24',
+                ],
             ],
             ['192.168.2.0/24', 25,
                 [
                     '192.168.2.0/25',
-                    '192.168.2.128/25'
-                ]
+                    '192.168.2.128/25',
+                ],
             ],
             ['192.168.2.0/30', 32,
                 [
                     '192.168.2.0/32',
                     '192.168.2.1/32',
                     '192.168.2.2/32',
-                    '192.168.2.3/32'
-                ]
+                    '192.168.2.3/32',
+                ],
             ],
         ];
     }
@@ -318,7 +321,7 @@ final class NetworkTest extends TestCase
                     '192.168.2.5',
                     '192.168.2.6',
                     '192.168.2.7',
-                ]
+                ],
             ],
             ['2001:db8::/125',
                 [
@@ -330,7 +333,7 @@ final class NetworkTest extends TestCase
                     '2001:db8::5',
                     '2001:db8::6',
                     '2001:db8::7',
-                ]
+                ],
             ],
         ];
     }
