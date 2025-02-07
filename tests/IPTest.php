@@ -1,14 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace IPTools\Tests;
 
 use IPTools\Exception\IpException;
 use IPTools\IP;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-class IPTest extends TestCase
+/**
+ * @internal
+ */
+final class IPTest extends TestCase
 {
-    public function testConstructor()
+    /**
+     * @throws IpException
+     */
+    public function testConstructor(): void
     {
         $ipv4String = '127.0.0.1';
         $ipv6String = '2001::';
@@ -27,17 +36,15 @@ class IPTest extends TestCase
         $this->assertEquals(IP::IP_V6_OCTETS, $ipv6->getOctetsCount());
     }
 
-    /**
-     * @dataProvider getTestContructorExceptionData
-     */
-    public function testConstructorException($string)
+    #[DataProvider('getTestConstructorExceptionData')]
+    public function testConstructorException($string): void
     {
         $this->expectException(IpException::class);
 
         new IP($string);
     }
 
-    public function testProperties()
+    public function testProperties(): void
     {
         $ip = new IP('127.0.0.1');
 
@@ -51,28 +58,30 @@ class IPTest extends TestCase
     }
 
     /**
-     * @dataProvider getToStringData
+     * @throws IpException
      */
-    public function testToString($actual, $expected)
+    #[DataProvider('getToStringData')]
+    public function testToString($actual, $expected): void
     {
         $ip = new IP($actual);
-        $this->assertEquals($expected, (string)$ip);
-
+        $this->assertEquals($expected, (string) $ip);
     }
 
     /**
-     * @dataProvider getTestParseData
+     * @throws IpException
      */
-    public function testParse($ipString, $expected)
+    #[DataProvider('getTestParseData')]
+    public function testParse($ipString, $expected): void
     {
         $ip = IP::parse($ipString);
         $this->assertEquals($expected, (string) $ip);
     }
 
     /**
-     * @dataProvider getParseBinData
+     * @throws IpException
      */
-    public function testParseBin($bin, $expectedString)
+    #[DataProvider('getParseBinData')]
+    public function testParseBin($bin, $expectedString): void
     {
         $ip = IP::parseBin($bin);
 
@@ -80,46 +89,54 @@ class IPTest extends TestCase
         $this->assertEquals($bin, $ip->toBin());
     }
 
-    public function testParseBinException()
+    public function testParseBinException(): void
     {
         $this->expectException(IpException::class);
 
         IP::parseBin('192.168.1.1');
     }
 
-    public function testParseLong()
+    /**
+     * @throws IpException
+     */
+    public function testParseLong(): void
     {
-        $ipv4long = '2130706433';
+        $ipv4long = 2130706433;
         $ipv4 = IP::parseLong($ipv4long);
 
         $ipv6Long = '340277174624079928635746076935438991360';
         $ipv6 = IP::parseLong($ipv6Long, IP::IP_V6);
 
-        $this->assertEquals('127.0.0.1', (string)$ipv4);
+        $this->assertEquals('127.0.0.1', (string) $ipv4);
         $this->assertEquals($ipv4long, $ipv4->toLong());
 
-        $this->assertEquals('ffff::', (string)$ipv6);
+        $this->assertEquals('ffff::', (string) $ipv6);
         $this->assertEquals($ipv6Long, $ipv6->toLong());
     }
 
-    public function testParseHex()
+    /**
+     * @throws IpException
+     */
+    public function testParseHex(): void
     {
         $hex = '7f000001';
         $ip = IP::parseHex($hex);
 
-        $this->assertEquals('127.0.0.1', (string)$ip);
+        $this->assertEquals('127.0.0.1', (string) $ip);
         $this->assertEquals($hex, $ip->toHex());
-
     }
 
-    public function testParseHexException()
+    public function testParseHexException(): void
     {
         $this->expectException(IpException::class);
 
         IP::parseHex('192.168.1.1');
     }
 
-    public function testParseInAddr()
+    /**
+     * @throws IpException
+     */
+    public function testParseInAddr(): void
     {
         $inAddr = inet_pton('127.0.0.1');
         $ip = IP::parseInAddr($inAddr);
@@ -133,9 +150,10 @@ class IPTest extends TestCase
     }
 
     /**
-     * @dataProvider getTestNextData
+     * @throws IpException
      */
-    public function testNext($ip, $step, $expected)
+    #[DataProvider('getTestNextData')]
+    public function testNext($ip, $step, $expected): void
     {
         $object = new IP($ip);
         $next = $object->next($step);
@@ -144,9 +162,10 @@ class IPTest extends TestCase
     }
 
     /**
-     * @dataProvider getTestPrevData
+     * @throws IpException
      */
-    public function testPrev($ip, $step, $expected)
+    #[DataProvider('getTestPrevData')]
+    public function testPrev($ip, $step, $expected): void
     {
         $object = new IP($ip);
         $prev = $object->prev($step);
@@ -154,100 +173,101 @@ class IPTest extends TestCase
         $this->assertEquals($expected, (string) $prev);
     }
 
-    public function testPrevException()
+    public function testPrevException(): void
     {
         $this->expectException(IpException::class);
 
-        $object = new IP('192.168.1.1');
-        $object->prev(-1);
+        $ip = new IP('192.168.1.1');
+        $ip->prev(-1);
     }
 
     /**
-     * @dataProvider getReversePointerData
+     * @throws IpException
      */
-    public function testReversePointer($ip, $expected)
+    #[DataProvider('getReversePointerData')]
+    public function testReversePointer($ip, $expected): void
     {
         $object = new IP($ip);
         $reversePointer = $object->getReversePointer();
         $this->assertEquals($expected, $reversePointer);
     }
 
-    public function getTestContructorExceptionData()
+    public static function getTestConstructorExceptionData(): array
     {
-        return array(
-            array('256.0.0.1'),
-            array('127.-1.0.1'),
-            array(123.45),
-            array(-123.45),
-            array('cake'),
-            array('12345'),
-            array('-12345'),
-            array('0000:0000:0000:ffff:0127:0000:0000:0001:0000'),
-        );
+        return [
+            ['256.0.0.1'],
+            ['127.-1.0.1'],
+            ['123.45'],
+            ['-123.45'],
+            ['cake'],
+            ['12345'],
+            ['-12345'],
+            ['0000:0000:0000:ffff:0127:0000:0000:0001:0000'],
+        ];
     }
 
-    public function getToStringData()
+    public static function getToStringData(): array
     {
-        return array(
-            array('127.0.0.1', '127.0.0.1'),
-            array('2001::', '2001::'),
-            array('2001:0000:0000:0000:0000:0000:0000:0000', '2001::'),
-            array('2001:0000:0000:0000:8000:0000:0000:0000', '2001::8000:0:0:0')
-        );
+        return [
+            ['127.0.0.1', '127.0.0.1'],
+            ['2001::', '2001::'],
+            ['2001:0000:0000:0000:0000:0000:0000:0000', '2001::'],
+            ['2001:0000:0000:0000:8000:0000:0000:0000', '2001::8000:0:0:0'],
+        ];
     }
 
-    public function getTestParseData()
+    public static function getTestParseData(): array
     {
-        return array(
-            array(2130706433, '127.0.0.1'), //long
-            array('0b01111111000000000000000000000001', '127.0.0.1'), //bin
-            array('0x7f000001', '127.0.0.1'), //hex,
-            array('0x20010000000000008000000000000000', '2001::8000:0:0:0'), //hex
-            array('127.0.0.1', '127.0.0.1'),
-            array('2001::', '2001::')
-        );
+        return [
+            ['2130706433', '127.0.0.1'], // long
+            ['0b01111111000000000000000000000001', '127.0.0.1'], // bin
+            ['0x7f000001', '127.0.0.1'], // hex,
+            ['0x20010000000000008000000000000000', '2001::8000:0:0:0'], // hex
+            ['127.0.0.1', '127.0.0.1'],
+            ['2001::', '2001::'],
+        ];
     }
 
-    public function getParseBinData()
+    public static function getParseBinData(): array
     {
-        return array(
-            array(
+        return [
+            [
                 '00100000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
-                '2001::'
-            ),
-            array('01111111000000000000000000000001', '127.0.0.1')
-        );
+                '2001::',
+            ],
+            ['01111111000000000000000000000001', '127.0.0.1'],
+        ];
     }
 
-    public function getTestNextData()
+    public static function getTestNextData(): array
     {
-        return array(
-            array('192.168.0.1', 1, '192.168.0.2'),
-            array('192.168.0.1', 254, '192.168.0.255'),
-            array('192.168.0.1', 255, '192.168.1.0'),
-            array('2001::', 1, '2001::1'),
-            array('2001::', 65535, '2001::ffff'),
-            array('2001::', 65536, '2001::1:0')
-        );
+        return [
+            ['192.168.0.1', 1, '192.168.0.2'],
+            ['192.168.0.1', 254, '192.168.0.255'],
+            ['192.168.0.1', 255, '192.168.1.0'],
+            ['2001::', 1, '2001::1'],
+            ['2001::', 65535, '2001::ffff'],
+            ['2001::', 65536, '2001::1:0'],
+        ];
     }
 
-    public function getTestPrevData()
+    public static function getTestPrevData(): array
     {
-        return array(
-            array('192.168.1.1', 1, '192.168.1.0'),
-            array('192.168.1.0', 1, '192.168.0.255'),
-            array('192.168.1.1', 258, '192.167.255.255'),
-            array('2001::1', 1, '2001::'),
-            array('2001::1:0', 1, '2001::ffff'),
-            array('2001::1:0', 65536, '2001::'),
-        );
+        return [
+            ['192.168.1.1', 1, '192.168.1.0'],
+            ['192.168.1.0', 1, '192.168.0.255'],
+            ['192.168.1.1', 258, '192.167.255.255'],
+            ['2001::1', 1, '2001::'],
+            ['2001::1:0', 1, '2001::ffff'],
+            ['2001::1:0', 65536, '2001::'],
+        ];
     }
 
-    public function getReversePointerData()
+    public static function getReversePointerData(): array
     {
-        return array(
-            array('192.0.2.5', '5.2.0.192.in-addr.arpa'),
-            array('2001:db8::567:89ab', 'b.a.9.8.7.6.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa'),
-        );
+        return [
+            ['192.0.2.5', '5.2.0.192.in-addr.arpa'],
+            ['2001:db8::567:89ab', 'b.a.9.8.7.6.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa'],
+        ];
     }
 }

@@ -4,18 +4,35 @@
     "description": "PHP Library for manipulating network addresses (IPv4 and IPv6)",
     "keywords": ["IP-Tools", "network", "subnet", "cidr", "IP", "IPv4", "IPv6"],
     "license": "MIT",
+    "scripts": {
+        "phpstan": "php ./vendor/bin/phpstan analyse --memory-limit=4G",
+        "pint": "./vendor/bin/pint --test -v",
+        "pint:fix": "./vendor/bin/pint",
+        "test": "./vendor/bin/pest"
+    },
     "authors": [{
         "name": "Safarov Alisher",
         "email": "alisher.safarov@outlook.com",
         "homepage": "https://github.com/S1lentium"
     }],
     "require": {
-        "php": ">=8.0",
+        "php": ">=8.4",
         "ext-bcmath": "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "~9.0",
-        "vimeo/psalm": "^4.0"
+        "laravel/pint": "^1.20.0",
+        "phpstan/phpstan": "^2.1.2",
+        "phpstan/extension-installer": "^1.3",
+        "phpstan/phpstan-phpunit": "^2.0.4",
+        "rector/rector": "^2.0.7",
+        "pestphp/pest": "^v3.7",
+        "pestphp/pest-plugin-type-coverage": "^3.2"
+    },
+    "config": {
+        "allow-plugins": {
+            "phpstan/extension-installer": true,
+            "pestphp/pest-plugin": true
+        }
     },
     "autoload": {
         "psr-4": {

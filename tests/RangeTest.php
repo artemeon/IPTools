@@ -1,17 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace IPTools\Tests;
 
+use IPTools\Exception\IpException;
+use IPTools\Exception\NetworkException;
+use IPTools\Exception\RangeException;
 use IPTools\IP;
 use IPTools\Range;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-class RangeTest extends TestCase
+/**
+ * @internal
+ */
+final class RangeTest extends TestCase
 {
     /**
-     * @dataProvider getTestParseData
+     * @throws NetworkException
+     * @throws RangeException
+     * @throws IpException
      */
-    public function testParse($data, $expected)
+    #[DataProvider('getTestParseData')]
+    public function testParse($data, $expected): void
     {
         $range = Range::parse($data);
 
@@ -20,98 +32,111 @@ class RangeTest extends TestCase
     }
 
     /**
-     * @dataProvider getTestNetworksData
+     * @throws RangeException
+     * @throws NetworkException
+     * @throws IpException
      */
-    public function testGetNetworks($data, $expected)
+    #[DataProvider('getTestNetworksData')]
+    public function testGetNetworks($data, $expected): void
     {
-        $result = array();
+        $result = [];
 
         foreach (Range::parse($data)->getNetworks() as $network) {
-            $result[] = (string)$network;
-        }
-
-        $this->assertEquals($expected, $result);        
-    }
-
-    /**
-     * @dataProvider getTestContainsData
-     */
-    public function testContains($data, $find, $expected)
-    {
-        $this->assertEquals($expected, Range::parse($data)->contains(new IP($find)));
-    }
-
-    /**
-     * @dataProvider getTestIterationData
-     */
-    public function testRangeIteration($data, $expected)
-    {
-        foreach (Range::parse($data) as $key => $ip) {
-           $result[] = (string)$ip;
+            $result[] = (string) $network;
         }
 
         $this->assertEquals($expected, $result);
     }
 
     /**
-     * @dataProvider getTestCountData
+     * @throws RangeException
+     * @throws NetworkException
+     * @throws IpException
      */
-    public function testCount($data, $expected)
+    #[DataProvider('getTestContainsData')]
+    public function testContains($data, $find, $expected): void
     {
-        $this->assertEquals($expected, count(Range::parse($data)));
+        $this->assertEquals($expected, Range::parse($data)->contains(new IP($find)));
     }
 
-    public function getTestParseData()
+    /**
+     * @throws NetworkException
+     * @throws IpException
+     * @throws RangeException
+     */
+    #[DataProvider('getTestIterationData')]
+    public function testRangeIteration($data, $expected): void
     {
-        return array(
-            array('127.0.0.1-127.255.255.255', array('127.0.0.1', '127.255.255.255')),
-            array('127.0.0.1/24', array('127.0.0.0', '127.0.0.255')),
-            array('127.*.0.0', array('127.0.0.0', '127.255.0.0')),
-            array('127.255.255.0', array('127.255.255.0', '127.255.255.0')),
-        );
+        $result = [];
+        foreach (Range::parse($data) as $range) {
+            $result[] = (string) $range;
+        }
+
+        $this->assertEquals($expected, $result);
     }
 
-    public function getTestNetworksData()
+    /**
+     * @throws NetworkException
+     * @throws RangeException
+     * @throws IpException
+     */
+    #[DataProvider('getTestCountData')]
+    public function testCount($data, $expected): void
     {
-        return array(
-            array('192.168.1.*', array('192.168.1.0/24')),
-            array('192.168.1.208-192.168.1.255', array(
+        $this->assertCount($expected, Range::parse($data));
+    }
+
+    public static function getTestParseData(): array
+    {
+        return [
+            ['127.0.0.1-127.255.255.255', ['127.0.0.1', '127.255.255.255']],
+            ['127.0.0.1/24', ['127.0.0.0', '127.0.0.255']],
+            ['127.*.0.0', ['127.0.0.0', '127.255.0.0']],
+            ['127.255.255.0', ['127.255.255.0', '127.255.255.0']],
+        ];
+    }
+
+    public static function getTestNetworksData(): array
+    {
+        return [
+            ['192.168.1.*', ['192.168.1.0/24']],
+            ['192.168.1.208-192.168.1.255', [
                 '192.168.1.208/28',
-                '192.168.1.224/27' 
-            )),
-            array('192.168.1.0-192.168.1.191', array(
+                '192.168.1.224/27',
+            ]],
+            ['192.168.1.0-192.168.1.191', [
                 '192.168.1.0/25',
-                '192.168.1.128/26' 
-            )),
-            array('192.168.1.125-192.168.1.126', array(
+                '192.168.1.128/26',
+            ]],
+            ['192.168.1.125-192.168.1.126', [
                 '192.168.1.125/32',
                 '192.168.1.126/32',
-            )),
-        );
+            ]],
+        ];
     }
 
-    public function getTestContainsData()
+    public static function getTestContainsData(): array
     {
-        return array(
-            array('192.168.*.*', '192.168.245.15', true),
-            array('192.168.*.*', '192.169.255.255', false),
+        return [
+            ['192.168.*.*', '192.168.245.15', true],
+            ['192.168.*.*', '192.169.255.255', false],
 
             /**
-             * 10.10.45.48 --> 00001010 00001010 00101101 00110000 
-             * the last 0000 leads error
+             * 10.10.45.48 --> 00001010 00001010 00101101 00110000
+             * the last 0000 leads error.
              */
-            array('10.10.45.48/28', '10.10.45.58', true),
+            ['10.10.45.48/28', '10.10.45.58', true],
 
-            array('2001:db8::/64', '2001:db8::ffff', true),
-            array('2001:db8::/64', '2001:db8:ffff::', false),
-        );
+            ['2001:db8::/64', '2001:db8::ffff', true],
+            ['2001:db8::/64', '2001:db8:ffff::', false],
+        ];
     }
 
-    public function getTestIterationData()
+    public static function getTestIterationData(): array
     {
-        return array(
-            array('192.168.2.0-192.168.2.7', 
-                array(
+        return [
+            ['192.168.2.0-192.168.2.7',
+                [
                     '192.168.2.0',
                     '192.168.2.1',
                     '192.168.2.2',
@@ -120,10 +145,10 @@ class RangeTest extends TestCase
                     '192.168.2.5',
                     '192.168.2.6',
                     '192.168.2.7',
-                )
-            ),
-            array('2001:db8::/125',
-                array(
+                ],
+            ],
+            ['2001:db8::/125',
+                [
                     '2001:db8::',
                     '2001:db8::1',
                     '2001:db8::2',
@@ -132,17 +157,16 @@ class RangeTest extends TestCase
                     '2001:db8::5',
                     '2001:db8::6',
                     '2001:db8::7',
-                )
-            ),
-        );
+                ],
+            ],
+        ];
     }
 
-    public function getTestCountData()
+    public static function getTestCountData(): array
     {
-        return array(
-            array('127.0.0.0/31', 2),
-            array('2001:db8::/120', 256),
-        );
+        return [
+            ['127.0.0.0/31', 2],
+            ['2001:db8::/120', 256],
+        ];
     }
-
 }

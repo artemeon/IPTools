@@ -1,288 +1,258 @@
 <?php
+
+declare(strict_types=1);
+
 namespace IPTools;
 
 use IPTools\Exception\IpException;
+use Stringable;
 
 /**
  * @author Safarov Alisher <alisher.safarov@outlook.com>
  * @link https://github.com/S1lentium/IPTools
  */
-class IP
+class IP implements Stringable
 {
-	use PropertyTrait;
+    use PropertyTrait;
 
-	const IP_V4 = 'IPv4';
-	const IP_V6 = 'IPv6';
+    public const string IP_V4 = 'IPv4';
 
-	const IP_V4_MAX_PREFIX_LENGTH = 32;
-	const IP_V6_MAX_PREFIX_LENGTH = 128;
+    public const string IP_V6 = 'IPv6';
 
-	const IP_V4_OCTETS = 4;
-	const IP_V6_OCTETS = 16;
+    public const int IP_V4_MAX_PREFIX_LENGTH = 32;
 
-	/**
-	 * @var string
-	 */
-	private $in_addr;
+    public const int IP_V6_MAX_PREFIX_LENGTH = 128;
 
-	/**
-	 * @param string ip
-	 * @throws IpException
-	 */
-	public function __construct($ip)
-	{
-		if (!filter_var($ip, FILTER_VALIDATE_IP)) {
-			throw new IpException("Invalid IP address format");
-		}
-		$this->in_addr = inet_pton($ip);
-	}
+    public const int IP_V4_OCTETS = 4;
 
-	/**
-	 * @return string
-	 */
-	public function __toString()
-	{
-		return inet_ntop($this->in_addr);
-	}
+    public const int IP_V6_OCTETS = 16;
 
-	/**
-	 * @param string ip
-	 * @return IP
-	 */
-	public static function parse($ip)
-	{
-		if (strpos($ip, '0x') === 0) {
-			$ip = substr($ip, 2);
-			return self::parseHex($ip);
-		}
+    private string $in_addr;
 
-		if (strpos($ip, '0b') === 0) {
-			$ip = substr($ip, 2);
-			return self::parseBin($ip);
-		}
+    /**
+     * @throws IpException
+     */
+    public function __construct(string $ip)
+    {
+        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+            throw new IpException('Invalid IP address format');
+        }
 
-		if (is_numeric($ip)) {
-			return self::parseLong($ip);
-		}
+        $this->in_addr = inet_pton($ip);
+    }
 
-		return new self($ip);
-	}
+    public function __toString(): string
+    {
+        return (string) inet_ntop($this->in_addr);
+    }
 
-	/**
-	 * @param string $binIP
-	 * @throws IpException
-	 * @return IP
-	 */
-	public static function parseBin($binIP)
-	{
-		if (!preg_match('/^([0-1]{32}|[0-1]{128})$/', $binIP)) {
-			throw new IpException("Invalid binary IP address format");
-		}
+    /**
+     * @throws IpException
+     */
+    public static function parse(string $ip): self
+    {
+        if (str_starts_with($ip, '0x')) {
+            $ip = substr($ip, 2);
 
-		$in_addr = '';
-		foreach (array_map('bindec', str_split($binIP, 8)) as $char) {
-			$in_addr .= pack('C*', $char);
-		}
+            return self::parseHex($ip);
+        }
 
-		return new self(inet_ntop($in_addr));
-	}
+        if (str_starts_with($ip, '0b')) {
+            $ip = substr($ip, 2);
 
-	/**
-	 * @param string $hexIP
-	 * @throws IpException
-	 * @return IP
-	 */
-	public static function parseHex($hexIP)
-	{
-		if (!preg_match('/^([0-9a-fA-F]{8}|[0-9a-fA-F]{32})$/', $hexIP)) {
-			throw new IpException("Invalid hexadecimal IP address format");
-		}
+            return self::parseBin($ip);
+        }
 
-		return new self(inet_ntop(pack('H*', $hexIP)));
-	}
+        if (is_numeric($ip)) {
+            return self::parseLong((int) $ip);
+        }
 
-	/**
-	 * @param string|int $longIP
-	 * @return IP
-	 */
-	public static function parseLong($longIP, $version=self::IP_V4)
-	{
-		if ($version === self::IP_V4) {
-			$ip = new self(long2ip($longIP));
-		} else {
-			$binary = array();
-			for ($i = 0; $i < self::IP_V6_OCTETS; $i++) {
-				$binary[] = bcmod($longIP, 256);
-				$longIP = bcdiv($longIP, 256, 0);
-			}
-			$ip = new self(inet_ntop(call_user_func_array('pack', array_merge(array('C*'), array_reverse($binary)))));
-		}
+        return new self($ip);
+    }
 
-		return $ip;
-	}
+    /**
+     * @throws IpException
+     */
+    public static function parseBin(string $binIP): self
+    {
+        if (!preg_match('/^([0-1]{32}|[0-1]{128})$/', $binIP)) {
+            throw new IpException('Invalid binary IP address format');
+        }
 
-	/**
-	 * @param string $inAddr
-	 * @return IP
-	 */
-	public static function parseInAddr($inAddr)
-	{
-		return new self(inet_ntop($inAddr));
-	}
+        $in_addr = '';
+        foreach (array_map('bindec', str_split($binIP, 8)) as $char) {
+            $in_addr .= pack('C*', $char);
+        }
 
-	/**
-	 * @return string
-	 */
-	public function getVersion()
-	{
-		$version = '';
+        return new self(inet_ntop($in_addr));
+    }
 
-		if (filter_var(inet_ntop($this->in_addr), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-			$version = self::IP_V4;
-		} elseif (filter_var(inet_ntop($this->in_addr), FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-			$version = self::IP_V6;
-		}
+    /**
+     * @throws IpException
+     */
+    public static function parseHex(string $hexIP): self
+    {
+        if (!preg_match('/^([0-9a-fA-F]{8}|[0-9a-fA-F]{32})$/', $hexIP)) {
+            throw new IpException('Invalid hexadecimal IP address format');
+        }
 
-		return $version;
-	}
+        return new self(inet_ntop(pack('H*', $hexIP)));
+    }
 
-	/**
-	 * @return int
-	 */
-	public function getMaxPrefixLength()
-	{
-		return $this->getVersion() === self::IP_V4
-			? self::IP_V4_MAX_PREFIX_LENGTH
-			: self::IP_V6_MAX_PREFIX_LENGTH;
-	}
+    /**
+     * @throws IpException
+     */
+    public static function parseLong(int | string $longIP, string $version = self::IP_V4): self
+    {
+        if ($version === self::IP_V4) {
+            $ip = new self(long2ip($longIP));
+        } else {
+            $binary = [];
+            for ($i = 0; $i < self::IP_V6_OCTETS; ++$i) {
+                $binary[] = bcmod($longIP, '256');
+                $longIP = bcdiv($longIP, '256');
+            }
 
-	/**
-	 * @return int
-	 */
-	public function getOctetsCount()
-	{
-		return $this->getVersion() === self::IP_V4
-			? self::IP_V4_OCTETS
-			: self::IP_V6_OCTETS;
-	}
+            $ip = new self(inet_ntop(pack(...array_merge(['C*'], array_reverse($binary)))));
+        }
 
-	/**
-	 * @return string
-	 */
-	public function getReversePointer()
-	{
-		if ($this->getVersion() === self::IP_V4) {
-			$reverseOctets = array_reverse(explode('.', $this->__toString()));
-			$reversePointer = implode('.', $reverseOctets) . '.in-addr.arpa';
-		} else {
-			$unpacked = unpack('H*hex', $this->in_addr);
-			$reverseOctets = array_reverse(str_split($unpacked['hex']));
-			$reversePointer = implode('.', $reverseOctets) . '.ip6.arpa';
-		}
+        return $ip;
+    }
 
-		return $reversePointer;
-	}
+    /**
+     * @throws IpException
+     */
+    public static function parseInAddr(string $inAddr): self
+    {
+        return new self(inet_ntop($inAddr));
+    }
 
-	/**
-	 * @return string
-	 */
-	public function inAddr()
-	{
-		return $this->in_addr;
-	}
+    public function getVersion(): string
+    {
+        $version = '';
 
-	/**
-	 * @return string
-	 */
-	public function toBin()
-	{
-		$binary = array();
-		foreach (unpack('C*', $this->in_addr) as $char) {
-			$binary[] = str_pad(decbin($char), 8, '0', STR_PAD_LEFT);
-		}
+        if (filter_var(inet_ntop($this->in_addr), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            $version = self::IP_V4;
+        } elseif (filter_var(inet_ntop($this->in_addr), FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            $version = self::IP_V6;
+        }
 
-		return implode($binary);
-	}
+        return $version;
+    }
 
-	/**
-	 * @return string
-	 */
-	public function toHex()
-	{
-		return bin2hex($this->in_addr);
-	}
+    public function getMaxPrefixLength(): int
+    {
+        return $this->getVersion() === self::IP_V4
+            ? self::IP_V4_MAX_PREFIX_LENGTH
+            : self::IP_V6_MAX_PREFIX_LENGTH;
+    }
 
-	/**
-	 * @return string
-	 */
-	public function toLong()
-	{
-		$long = 0;
-		if ($this->getVersion() === self::IP_V4) {
-			$long = sprintf('%u', ip2long(inet_ntop($this->in_addr)));
-		} else {
-			$octet = self::IP_V6_OCTETS - 1;
-			foreach ($chars = unpack('C*', $this->in_addr) as $char) {
-				$long = bcadd($long, bcmul($char, bcpow(256, $octet--)));
-			}
-		}
+    public function getOctetsCount(): int
+    {
+        return $this->getVersion() === self::IP_V4
+            ? self::IP_V4_OCTETS
+            : self::IP_V6_OCTETS;
+    }
 
-		return $long;
-	}
+    public function getReversePointer(): string
+    {
+        if ($this->getVersion() === self::IP_V4) {
+            $reverseOctets = array_reverse(explode('.', $this->__toString()));
+            $reversePointer = implode('.', $reverseOctets) . '.in-addr.arpa';
+        } else {
+            $unpacked = unpack('H*hex', $this->in_addr);
+            $reverseOctets = array_reverse(str_split((string) $unpacked['hex']));
+            $reversePointer = implode('.', $reverseOctets) . '.ip6.arpa';
+        }
 
-	/**
-	 * @param int $to
-	 * @return IP
-	 * @throws IpException
-	 */
-	public function next($to=1)
-	{
-		if ($to < 0) {
-			throw new IpException("Number must be greater than 0");
-		}
+        return $reversePointer;
+    }
 
-		$unpacked = unpack('C*', $this->in_addr);
+    public function inAddr(): false | string
+    {
+        return $this->in_addr;
+    }
 
-		for ($i = 0; $i < $to; $i++)	{
-			for ($byte = count($unpacked); $byte >= 0; --$byte) {
-				if ($unpacked[$byte] < 255) {
-					$unpacked[$byte]++;
-					break;
-				}
+    public function toBin(): string
+    {
+        $binary = [];
+        foreach (unpack('C*', $this->in_addr) as $char) {
+            $binary[] = str_pad(decbin($char), 8, '0', STR_PAD_LEFT);
+        }
 
-				$unpacked[$byte] = 0;
-			}
-		}
+        return implode('', $binary);
+    }
 
-		return new self(inet_ntop(call_user_func_array('pack', array_merge(array('C*'), $unpacked))));
-	}
+    public function toHex(): string
+    {
+        return bin2hex($this->in_addr);
+    }
 
-	/**
-	 * @param int $to
-	 * @return IP
-	 * @throws IpException
-	 */
-	public function prev($to=1)
-	{
+    public function toLong(): string
+    {
+        $long = 0;
+        if ($this->getVersion() === self::IP_V4) {
+            $long = sprintf('%u', ip2long(inet_ntop($this->in_addr)));
+        } else {
+            $octet = self::IP_V6_OCTETS - 1;
+            foreach (unpack('C*', $this->in_addr) as $char) {
+                $exponent = (string) $octet--;
+                $long = bcadd((string) $long, bcmul((string) $char, bcpow('256', $exponent)));
+            }
+        }
 
-		if ($to < 0) {
-			throw new IpException("Number must be greater than 0");
-		}
+        return $long;
+    }
 
-		$unpacked = unpack('C*', $this->in_addr);
+    /**
+     * @throws IpException
+     */
+    public function next(int $to = 1): self
+    {
+        if ($to < 0) {
+            throw new IpException('Number must be greater than 0');
+        }
 
-		for ($i = 0; $i < $to; $i++)	{
-			for ($byte = count($unpacked); $byte >= 0; --$byte) {
-				if ($unpacked[$byte] === 0) {
-					$unpacked[$byte] = 255;
-				} else {
-					$unpacked[$byte]--;
-					break;
-				}
-			}
-		}
+        $unpacked = unpack('C*', $this->in_addr);
 
-		return new self(inet_ntop(call_user_func_array('pack', array_merge(array('C*'), $unpacked))));
-	}
+        for ($i = 0; $i < $to; ++$i) {
+            for ($byte = count($unpacked); $byte >= 0; --$byte) {
+                if ($unpacked[$byte] < 255) {
+                    ++$unpacked[$byte];
 
+                    break;
+                }
+
+                $unpacked[$byte] = 0;
+            }
+        }
+
+        return new self(inet_ntop(pack(...array_merge(['C*'], $unpacked))));
+    }
+
+    /**
+     * @throws IpException
+     */
+    public function prev(int $to = 1): self
+    {
+        if ($to < 0) {
+            throw new IpException('Number must be greater than 0');
+        }
+
+        $unpacked = unpack('C*', $this->in_addr);
+
+        for ($i = 0; $i < $to; ++$i) {
+            for ($byte = count($unpacked); $byte >= 0; --$byte) {
+                if ($unpacked[$byte] === 0) {
+                    $unpacked[$byte] = 255;
+                } else {
+                    --$unpacked[$byte];
+
+                    break;
+                }
+            }
+        }
+
+        return new self(inet_ntop(pack(...array_merge(['C*'], $unpacked))));
+    }
 }
